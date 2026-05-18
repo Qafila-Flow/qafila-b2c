@@ -9,11 +9,9 @@
   },
   "nav": {
     "categories": "الفئات",
-    "exclusives": "حصريات",
-    "hotSales": "عروض جديدة",
-    "limitedStock": "كمية محدودة",
-    "gifts": "هدايا",
-    "saudiFashion": "أزياء سعودية",
+    "tagLimitedEditions": "إصدارات محدودة",
+    "tagLuxuries": "كماليات",
+    "tagOriginals": "أصلية",
     "priceAccess": "السعر والوصول",
     "researchAI": "بحث AI",
     "menu": "القائمة"
@@ -93,6 +91,18 @@
   "product": {
     "trendingNow": "رائج الآن",
     "reviews": "(192)"
+  },
+  "productTag": {
+    "limitedEditions": "إصدار محدود",
+    "luxuries": "كماليات",
+    "originals": "أصلي"
+  },
+  "productTagPage": {
+    "eyebrow": "مجموعة مختارة",
+    "subtitle": "{count, plural, =0 {لا توجد منتجات بعد} =1 {منتج واحد} =2 {منتجان} few {# منتجات} many {# منتجاً} other {# منتج}} في هذه المجموعة",
+    "emptyTitle": "لا يوجد شيء هنا بعد",
+    "emptyBody": "لم يضِف البائعون أي منتجات إلى هذه المجموعة بعد — تابعنا قريباً.",
+    "metaTitle": "{tag} | قافلة"
   },
   "footer": {
     "subscribe": "اشترك في نشرتنا الإخبارية",

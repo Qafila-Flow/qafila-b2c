@@ -45,6 +45,7 @@ function mapProduct(item: RecommendationProduct, locale: string): Product {
     badge: hasSale ? `${discount}%` : null,
     image: item.imageUrl,
     slug: item.slug,
+    tags: item.tags ?? [],
   };
 }
 

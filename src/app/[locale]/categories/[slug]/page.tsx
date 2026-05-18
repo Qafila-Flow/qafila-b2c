@@ -54,6 +54,7 @@ function mapApiProduct(item: ApiProduct, locale: string): Product {
     badge: hasSale ? `${discount}%` : null,
     image: imageUrl,
     slug: item.slug,
+    tags: item.tags ?? [],
   };
 }
 

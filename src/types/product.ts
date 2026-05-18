@@ -1,3 +1,5 @@
+import type { ProductTag } from "@/lib/api/products";
+
 export interface RecommendationProduct {
   id: string;
   title: string;
@@ -9,6 +11,7 @@ export interface RecommendationProduct {
   averageRating: number;
   reviewCount: number;
   isFeatured: boolean;
+  tags?: ProductTag[];
   category: {
     id: string;
     name: string;

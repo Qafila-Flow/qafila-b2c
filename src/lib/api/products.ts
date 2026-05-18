@@ -1,6 +1,14 @@
 import apiClient from "./client";
 import type { PaginatedResponse } from "./types";
 
+export type ProductTag = "LIMITED_EDITIONS" | "LUXURIES" | "ORIGINALS";
+
+export const PRODUCT_TAGS: ProductTag[] = [
+  "LIMITED_EDITIONS",
+  "LUXURIES",
+  "ORIGINALS",
+];
+
 export interface ApiProductColor {
   id: string;
   productId: string;
@@ -66,6 +74,7 @@ export interface ApiProduct {
   reviewCount: number;
   isFeatured: boolean;
   isActive: boolean;
+  tags: ProductTag[];
   createdAt: string;
   updatedAt: string;
   category: {
@@ -109,19 +118,20 @@ export interface ApiProduct {
 }
 
 export interface GetProductsParams {
-  categoryId?: string;
-  vendorId?: string;
-  brandId?: string;
-  colorId?: string;
-  sizeId?: string;
-  materialId?: string;
-  patternId?: string;
+  categoryId?: string | string[];
+  vendorId?: string | string[];
+  brandId?: string | string[];
+  colorId?: string | string[];
+  sizeId?: string | string[];
+  materialId?: string | string[];
+  patternId?: string | string[];
   minPrice?: number;
   maxPrice?: number;
   onSale?: boolean;
   sortBy?: string;
   sortOrder?: string;
   search?: string;
+  tags?: ProductTag[];
   page?: number;
   limit?: number;
 }

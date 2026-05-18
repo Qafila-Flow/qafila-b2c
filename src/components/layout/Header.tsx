@@ -383,34 +383,28 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
                 className={`transition-transform ${menuOpen ? "rotate-180" : ""}`}
               />
             </button>
-            <Link
-              href="#"
-              className="rounded px-3 py-1.5 text-sm font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
-            >
-              {t("nav.exclusives")}
-            </Link>
-            <Link
-              href="#"
-              className="rounded px-3 py-1.5 text-sm font-bold text-primary"
-            >
-              {t("nav.hotSales")}
-            </Link>
-            <Link
-              href="#"
-              className="rounded px-3 py-1.5 text-sm font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
-            >
-              {t("nav.limitedStock")}
-            </Link>
-            <Link
-              href="#"
-              className="rounded px-3 py-1.5 text-sm font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
-            >
-              {t("nav.gifts")}
-            </Link>
-            <button className="flex items-center gap-1 rounded px-3 py-1.5 text-sm font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80">
-              {t("nav.saudiFashion")}
-              <ChevronDown size={14} />
-            </button>
+            {(
+              [
+                { href: "/tags/limited-editions", label: "nav.tagLimitedEditions" },
+                { href: "/tags/luxuries", label: "nav.tagLuxuries" },
+                { href: "/tags/originals", label: "nav.tagOriginals" },
+              ] as const
+            ).map(({ href, label }) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`rounded px-3 py-1.5 text-sm transition-colors ${
+                    isActive
+                      ? "font-bold text-primary"
+                      : "font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
+                  }`}
+                >
+                  {t(label)}
+                </Link>
+              );
+            })}
             <Link
               href="/research"
               className="flex items-center gap-1 rounded px-3 py-1.5 text-sm font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
@@ -495,51 +489,30 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
         {/* Drawer Navigation Links */}
         <nav className="px-5 py-3">
           <ul className="space-y-1">
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
-                onClick={() => setMobileDrawerOpen(false)}
-              >
-                {t("nav.exclusives")}
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-bold text-primary hover:bg-gray-50 dark:hover:bg-dark/80"
-                onClick={() => setMobileDrawerOpen(false)}
-              >
-                {t("nav.hotSales")}
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
-                onClick={() => setMobileDrawerOpen(false)}
-              >
-                {t("nav.limitedStock")}
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
-                onClick={() => setMobileDrawerOpen(false)}
-              >
-                {t("nav.gifts")}
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
-                onClick={() => setMobileDrawerOpen(false)}
-              >
-                {t("nav.saudiFashion")}
-              </Link>
-            </li>
+            {(
+              [
+                { href: "/tags/limited-editions", label: "nav.tagLimitedEditions" },
+                { href: "/tags/luxuries", label: "nav.tagLuxuries" },
+                { href: "/tags/originals", label: "nav.tagOriginals" },
+              ] as const
+            ).map(({ href, label }) => {
+              const isActive = pathname === href;
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                      isActive
+                        ? "font-bold text-primary"
+                        : "font-medium text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
+                    }`}
+                    onClick={() => setMobileDrawerOpen(false)}
+                  >
+                    {t(label)}
+                  </Link>
+                </li>
+              );
+            })}
             <li>
               <Link
                 href="/research"

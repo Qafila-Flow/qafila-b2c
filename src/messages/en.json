@@ -9,11 +9,9 @@
   },
   "nav": {
     "categories": "Categories",
-    "exclusives": "Exclusives",
-    "hotSales": "Hot Sales",
-    "limitedStock": "Limited Stock",
-    "gifts": "Gifts",
-    "saudiFashion": "Saudi Fashion",
+    "tagLimitedEditions": "Limited Editions",
+    "tagLuxuries": "Luxuries",
+    "tagOriginals": "Originals",
     "priceAccess": "Price & Access",
     "researchAI": "Research AI",
     "menu": "Menu"
@@ -93,6 +91,18 @@
   "product": {
     "trendingNow": "Trending Now",
     "reviews": "(192)"
+  },
+  "productTag": {
+    "limitedEditions": "Limited Edition",
+    "luxuries": "Luxury",
+    "originals": "Original"
+  },
+  "productTagPage": {
+    "eyebrow": "Curated collection",
+    "subtitle": "{count, plural, =0 {No products yet} =1 {1 product} other {# products}} in this collection",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "Vendors haven't tagged any products in this collection yet — check back soon.",
+    "metaTitle": "{tag} | Qafila"
   },
   "footer": {
     "subscribe": "SUBSCRIBE TO OUR NEWSLETTER",
