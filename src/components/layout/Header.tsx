@@ -18,8 +18,9 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import MegaMenu from "@/components/layout/MegaMenu";
+import { useTypewriterPlaceholder } from "@/lib/hooks/useTypewriterPlaceholder";
 import type { Category } from "@/types/category";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
@@ -53,6 +54,27 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
 
   const rootTabs = categoryTree.filter((c) => c.parentId === null);
   const { activeRootSlug, setActiveRootSlug } = useActiveCategory();
+
+  // Typewriter placeholder for the header search inputs.
+  const searchPlaceholders = useMemo<string[]>(() => {
+    const raw = t.raw("search.placeholders");
+    return Array.isArray(raw) && raw.length > 0
+      ? (raw as string[])
+      : [t("search.placeholder")];
+  }, [t]);
+  const [desktopSearchFocused, setDesktopSearchFocused] = useState(false);
+  const [desktopSearchValue, setDesktopSearchValue] = useState("");
+  const [drawerSearchFocused, setDrawerSearchFocused] = useState(false);
+  const [drawerSearchValue, setDrawerSearchValue] = useState("");
+  const desktopPlaceholder = useTypewriterPlaceholder(searchPlaceholders, {
+    enabled: !desktopSearchFocused && desktopSearchValue.length === 0,
+  });
+  const drawerPlaceholder = useTypewriterPlaceholder(searchPlaceholders, {
+    enabled:
+      mobileDrawerOpen &&
+      !drawerSearchFocused &&
+      drawerSearchValue.length === 0,
+  });
 
   const switchLocale = (newLocale: "en" | "ar") => {
     router.replace(pathname, { locale: newLocale });
@@ -187,7 +209,16 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
               />
               <input
                 type="text"
-                placeholder={t("search.placeholder")}
+                value={desktopSearchValue}
+                onChange={(e) => setDesktopSearchValue(e.target.value)}
+                onFocus={() => setDesktopSearchFocused(true)}
+                onBlur={() => setDesktopSearchFocused(false)}
+                placeholder={
+                  desktopSearchFocused
+                    ? t("search.placeholder")
+                    : `${desktopPlaceholder}|`
+                }
+                aria-label={t("search.placeholder")}
                 className="w-full rounded-full border border-gray-border bg-gray-light py-2.5 pe-4 ps-10 text-sm outline-none transition-colors focus:border-primary dark:bg-dark dark:border-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400"
               />
             </div>
@@ -480,7 +511,16 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
             />
             <input
               type="text"
-              placeholder={t("search.placeholder")}
+              value={drawerSearchValue}
+              onChange={(e) => setDrawerSearchValue(e.target.value)}
+              onFocus={() => setDrawerSearchFocused(true)}
+              onBlur={() => setDrawerSearchFocused(false)}
+              placeholder={
+                drawerSearchFocused
+                  ? t("search.placeholder")
+                  : `${drawerPlaceholder}|`
+              }
+              aria-label={t("search.placeholder")}
               className="w-full rounded-full border border-gray-border bg-gray-light py-2.5 pe-4 ps-10 text-sm outline-none transition-colors focus:border-primary dark:bg-dark dark:border-gray-600 dark:text-gray-100 dark:placeholder:text-gray-400"
             />
           </div>

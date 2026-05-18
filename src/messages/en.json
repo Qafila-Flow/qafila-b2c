@@ -29,7 +29,15 @@
     "exportPdf": "Export as PDF"
   },
   "search": {
-    "placeholder": "Search for \"Watches\""
+    "placeholder": "Search for \"Watches\"",
+    "placeholders": [
+      "Search for \"Watches\"",
+      "Search for \"Perfumes\"",
+      "Search for \"Abayas\"",
+      "Search for \"Smartphones\"",
+      "Search for \"Sneakers\"",
+      "Search for \"Skincare\""
+    ]
   },
   "header": {
     "stories": "Stories",
