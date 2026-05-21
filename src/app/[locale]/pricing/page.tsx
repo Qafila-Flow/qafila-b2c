@@ -652,6 +652,162 @@ export default function PricingPage() {
           }}
         />
 
+        {/* ── Animated orbital arc constellation ─────────────────────── */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-full flex justify-center"
+        >
+          <svg
+            viewBox="0 0 1200 760"
+            preserveAspectRatio="xMidYMax meet"
+            className="hero-arc-svg h-full w-full"
+          >
+            <defs>
+              <linearGradient id="arcGradMain" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stopColor="#7850c8" stopOpacity="0" />
+                <stop offset="22%"  stopColor="#7850c8" stopOpacity="0.65" />
+                <stop offset="50%"  stopColor="#e8983a" stopOpacity="1" />
+                <stop offset="78%"  stopColor="#e8983a" stopOpacity="0.65" />
+                <stop offset="100%" stopColor="#7850c8" stopOpacity="0" />
+              </linearGradient>
+              <radialGradient id="arcCoreGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stopColor="#e8983a" stopOpacity="1" />
+                <stop offset="55%"  stopColor="#e8983a" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#e8983a" stopOpacity="0" />
+              </radialGradient>
+              <filter id="arcGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3.5" result="b" />
+                <feMerge>
+                  <feMergeNode in="b" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+
+              <path id="arcOuter" d="M 60 760  A 560 560 0 0 1 1140 760" />
+              <path id="arcMain"  d="M 140 760 A 480 480 0 0 1 1060 760" />
+              <path id="arcInner" d="M 220 760 A 400 400 0 0 1 980 760" />
+            </defs>
+
+            {/* Radial tick marks fanning from the origin */}
+            <g>
+              {Array.from({ length: 13 }).map((_, i) => {
+                const angle = (i - 6) * 7;
+                return (
+                  <line
+                    key={i}
+                    x1="600"
+                    y1="722"
+                    x2="600"
+                    y2="696"
+                    stroke="rgba(232,152,58,0.55)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    transform={`rotate(${angle} 600 760)`}
+                    className="arc-tick"
+                    style={{ animationDelay: `${300 + i * 55}ms` }}
+                  />
+                );
+              })}
+            </g>
+
+            {/* Outer faint purple orbit — slow reverse march */}
+            <use
+              href="#arcOuter"
+              fill="none"
+              stroke="rgba(120,80,200,0.5)"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeDasharray="2 14"
+              className="arc-flow-slow"
+            />
+
+            {/* Main arc — gradient stroke that draws in on mount */}
+            <use
+              href="#arcMain"
+              fill="none"
+              stroke="url(#arcGradMain)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              pathLength="1"
+              className="arc-main"
+            />
+
+            {/* Bright energy pulse flowing along the main arc */}
+            <use
+              href="#arcMain"
+              fill="none"
+              stroke="#e8983a"
+              strokeOpacity="0.95"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              className="arc-flow-bright"
+              filter="url(#arcGlow)"
+            />
+
+            {/* Inner arc — fast forward dashes */}
+            <use
+              href="#arcInner"
+              fill="none"
+              stroke="rgba(232,152,58,0.45)"
+              strokeWidth="1"
+              strokeLinecap="round"
+              strokeDasharray="1 9"
+              className="arc-flow-fast"
+            />
+
+            {/* Three orbiting glowing dots */}
+            <g filter="url(#arcGlow)">
+              <circle r="5" fill="#e8983a">
+                <animate
+                  attributeName="opacity"
+                  values="0.45;1;0.45"
+                  dur="2.2s"
+                  repeatCount="indefinite"
+                />
+                <animateMotion dur="9s" repeatCount="indefinite" rotate="auto">
+                  <mpath href="#arcMain" />
+                </animateMotion>
+              </circle>
+              <circle r="3.5" fill="#7850c8">
+                <animateMotion
+                  dur="11s"
+                  repeatCount="indefinite"
+                  calcMode="linear"
+                  keyPoints="1;0"
+                  keyTimes="0;1"
+                >
+                  <mpath href="#arcOuter" />
+                </animateMotion>
+              </circle>
+              <circle r="2.5" fill="#ffffff" opacity="0.95">
+                <animateMotion dur="7s" repeatCount="indefinite" begin="-3s">
+                  <mpath href="#arcInner" />
+                </animateMotion>
+              </circle>
+            </g>
+
+            {/* Origin core — radial glow that breathes */}
+            <circle cx="600" cy="760" r="48" fill="url(#arcCoreGrad)">
+              <animate attributeName="r" values="38;66;38" dur="3.6s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.4;0.9;0.4" dur="3.6s" repeatCount="indefinite" />
+            </circle>
+
+            {/* Expanding ping rings — radar-style outward ripples */}
+            <circle cx="600" cy="760" fill="none" stroke="#e8983a" strokeWidth="1.5">
+              <animate attributeName="r" values="18;140" dur="3s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.75;0" dur="3s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="600" cy="760" fill="none" stroke="#7850c8" strokeWidth="1">
+              <animate attributeName="r" values="18;120" dur="3s" begin="1.5s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.6;0" dur="3s" begin="1.5s" repeatCount="indefinite" />
+            </circle>
+
+            {/* Inner core dot */}
+            <circle cx="600" cy="760" r="6" fill="#ffffff" opacity="0.95" filter="url(#arcGlow)" />
+            <circle cx="600" cy="760" r="3.5" fill="#e8983a" />
+          </svg>
+        </div>
+
         <div className="relative z-10 mx-auto max-w-6xl px-6 pt-20 pb-12 lg:pt-28">
           {/* Eyebrow chip with shimmer */}
           <div className="mb-6 flex justify-center">
