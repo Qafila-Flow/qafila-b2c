@@ -524,11 +524,11 @@ export default function StoryViewer({
                   className="flex w-full items-center gap-2 text-start"
                 >
                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-[8px] font-bold text-white">
-                    {c.user.firstName.charAt(0)}
+                    {c.user.firstName?.charAt(0) ?? "?"}
                   </div>
                   <p className="min-w-0 flex-1 truncate text-[11px] text-white/80">
                     <span className="font-semibold text-white">
-                      {c.user.firstName}
+                      {c.user.firstName ?? "User"}
                     </span>{" "}
                     {c.content}
                   </p>

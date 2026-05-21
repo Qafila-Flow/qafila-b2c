@@ -162,12 +162,12 @@ export default function StoryComments({ storyId, onClose }: StoryCommentsProps) 
         <div className="group flex gap-2 py-2">
           {/* Avatar */}
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-dark">
-            {comment.user.firstName.charAt(0)}
+            {comment.user.firstName?.charAt(0) ?? "?"}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span className="text-xs font-semibold text-dark">
-                {comment.user.firstName} {comment.user.lastName}
+                {comment.user.firstName ?? "User"} {comment.user.lastName ?? ""}
               </span>
               <span className="text-[10px] text-gray-text">
                 {timeSince(comment.createdAt)}
