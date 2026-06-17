@@ -116,7 +116,7 @@ export default function ProductCard({
             alt={tt("saudiMade")}
             width={46}
             height={31}
-            className={`absolute start-2.5 z-10 h-auto w-11 drop-shadow-md ${
+            className={`absolute start-0 z-10 h-auto w-11 drop-shadow-md ${
               product.badge ? "top-9" : "top-2.5"
             }`}
           />
