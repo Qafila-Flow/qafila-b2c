@@ -3,7 +3,6 @@
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import {
-  Search,
   Heart,
   ShoppingBasket,
   Menu,
@@ -17,10 +16,11 @@ import {
   X,
   Sun,
   Moon,
+  Crown,
 } from "lucide-react";
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import MegaMenu from "@/components/layout/MegaMenu";
-import { useTypewriterPlaceholder } from "@/lib/hooks/useTypewriterPlaceholder";
+import SearchBox from "@/components/shared/SearchBox";
 import type { Category } from "@/types/category";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth-context";
@@ -29,6 +29,12 @@ import { useWishlist } from "@/lib/wishlist-context";
 import { useActiveCategory } from "@/lib/active-category-context";
 import LoginModal from "@/components/auth/LoginModal";
 import { useTheme } from "@/lib/theme-context";
+import { useSubscription } from "@/lib/subscription-context";
+
+// Vendor application form lives in a separate app (qafila-form). Set the
+// deployed URL via NEXT_PUBLIC_SELLER_URL; falls back to the local dev port.
+const SELLER_URL =
+  process.env.NEXT_PUBLIC_SELLER_URL || "https://qafila-b2b.bits3.com";
 
 interface HeaderProps {
   categoryTree?: Category[];
@@ -43,6 +49,12 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
   const { itemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
   const { theme, toggleTheme } = useTheme();
+  const { isPremium, subscription } = useSubscription();
+
+  // Plan name shown on the gold membership badge (falls back to a label).
+  const planName =
+    (locale === "ar" ? subscription?.plan?.nameAr : subscription?.plan?.name) ||
+    t("premium.member");
 
   const [langOpen, setLangOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -54,27 +66,6 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
 
   const rootTabs = categoryTree.filter((c) => c.parentId === null);
   const { activeRootSlug, setActiveRootSlug } = useActiveCategory();
-
-  // Typewriter placeholder for the header search inputs.
-  const searchPlaceholders = useMemo<string[]>(() => {
-    const raw = t.raw("search.placeholders");
-    return Array.isArray(raw) && raw.length > 0
-      ? (raw as string[])
-      : [t("search.placeholder")];
-  }, [t]);
-  const [desktopSearchFocused, setDesktopSearchFocused] = useState(false);
-  const [desktopSearchValue, setDesktopSearchValue] = useState("");
-  const [drawerSearchFocused, setDrawerSearchFocused] = useState(false);
-  const [drawerSearchValue, setDrawerSearchValue] = useState("");
-  const desktopPlaceholder = useTypewriterPlaceholder(searchPlaceholders, {
-    enabled: !desktopSearchFocused && desktopSearchValue.length === 0,
-  });
-  const drawerPlaceholder = useTypewriterPlaceholder(searchPlaceholders, {
-    enabled:
-      mobileDrawerOpen &&
-      !drawerSearchFocused &&
-      drawerSearchValue.length === 0,
-  });
 
   const switchLocale = (newLocale: "en" | "ar") => {
     router.replace(pathname, { locale: newLocale });
@@ -119,9 +110,35 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-white dark:bg-dark shadow-sm dark:shadow-dark/50">
+      <header
+        className={`sticky top-0 z-50 w-full shadow-sm ${
+          isPremium
+            ? "dark premium-header shadow-amber-950/40"
+            : "bg-white dark:bg-dark dark:shadow-dark/50"
+        }`}
+      >
+        {/* Premium gold ambience (sparkles, travelling sheen, glowing edges) */}
+        {isPremium && (
+          <>
+            <div className="premium-sparkles" aria-hidden="true" />
+            <div className="premium-sheen" aria-hidden="true" />
+            <div
+              className="premium-edge pointer-events-none absolute inset-x-0 top-0 z-20 h-px"
+              aria-hidden="true"
+            />
+            <div
+              className="premium-edge pointer-events-none absolute inset-x-0 bottom-0 z-20 h-px"
+              aria-hidden="true"
+            />
+          </>
+        )}
+
         {/* Top Bar - hidden on mobile */}
-        <div className="hidden bg-dark text-white md:block">
+        <div
+          className={`relative z-10 hidden text-white md:block ${
+            isPremium ? "" : "bg-dark"
+          }`}
+        >
           <div className="mx-auto flex max-w-360 items-stretch justify-between px-6 text-sm">
             {/* Left - Tabs */}
             <div className="flex items-stretch gap-4">
@@ -178,7 +195,16 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
         </div>
 
         {/* Middle Bar - Logo, Search, Icons */}
-        <div className="border-b border-gray-border dark:border-gray-700">
+        {/* z-30 keeps this bar's overflowing dropdowns (login menu, search
+            results) above the navigation bar below it — which is also a
+            positioned `z-10` layer and would otherwise intercept their clicks. */}
+        <div
+          className={`relative z-30 border-b ${
+            isPremium
+              ? "border-amber-400/20"
+              : "border-gray-border dark:border-gray-700"
+          }`}
+        >
           <div className="mx-auto flex max-w-360 items-center justify-between gap-4 px-6 py-3">
             {/* Mobile hamburger + Logo */}
             <div className="flex items-center gap-2">
@@ -192,7 +218,11 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
               <Link href="/" className="shrink-0">
                 <div className="flex items-center gap-1.5">
                   <Image
-                    src={theme === "dark" ? "/logo-footer.svg" : "/logo.svg"}
+                    src={
+                      theme === "dark" || isPremium
+                        ? "/logo-footer.svg"
+                        : "/logo.svg"
+                    }
                     height={48}
                     width={150}
                     alt="qafila"
@@ -202,26 +232,7 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
             </div>
 
             {/* Search */}
-            <div className="relative hidden max-w-md flex-1 md:block">
-              <Search
-                size={16}
-                className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-text"
-              />
-              <input
-                type="text"
-                value={desktopSearchValue}
-                onChange={(e) => setDesktopSearchValue(e.target.value)}
-                onFocus={() => setDesktopSearchFocused(true)}
-                onBlur={() => setDesktopSearchFocused(false)}
-                placeholder={
-                  desktopSearchFocused
-                    ? t("search.placeholder")
-                    : `${desktopPlaceholder}|`
-                }
-                aria-label={t("search.placeholder")}
-                className="w-full rounded-full border border-gray-border bg-gray-light py-2.5 pe-4 ps-10 text-sm outline-none transition-colors focus:border-primary dark:bg-dark dark:border-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400"
-              />
-            </div>
+            <SearchBox className="hidden max-w-md flex-1 md:block" />
 
             {/* Right Icons */}
             <div className="flex items-center gap-5">
@@ -283,6 +294,17 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
               {/* Divider */}
               <div className="hidden h-5 w-px bg-gray-border dark:bg-gray-700 md:block" />
 
+              {/* Gold Member badge */}
+              {isPremium && (
+                <>
+                  <span className="premium-pill hidden items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-extrabold tracking-wide text-amber-950 lg:flex">
+                    <Crown size={13} className="fill-amber-950/90" />
+                    <span className="max-w-28 truncate">{planName}</span>
+                  </span>
+                  <div className="hidden h-5 w-px bg-amber-400/30 lg:block" />
+                </>
+              )}
+
               {/* Login / User dropdown */}
               <div className="relative" ref={loginDropdownRef}>
                 <button
@@ -290,9 +312,32 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
                   className="flex items-center gap-1.5 text-sm text-dark dark:text-gray-200 cursor-pointer"
                 >
                   {isLoggedIn ? (
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-semibold text-dark dark:text-gray-200">
-                      {(user?.firstName?.[0] || "").toUpperCase()}
-                      {(user?.lastName?.[0] || "").toUpperCase()}
+                    <span className="relative inline-flex">
+                      {isPremium && (
+                        <Crown
+                          size={14}
+                          aria-hidden="true"
+                          className="premium-crown absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 fill-amber-300 text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]"
+                        />
+                      )}
+                      <span
+                        className={
+                          isPremium
+                            ? "premium-ring flex h-8 w-8 items-center justify-center rounded-full p-[2px]"
+                            : "flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
+                        }
+                      >
+                        <span
+                          className={`flex h-full w-full items-center justify-center rounded-full text-xs font-semibold ${
+                            isPremium
+                              ? "bg-[#1c1407] text-amber-100"
+                              : "text-dark dark:text-gray-200"
+                          }`}
+                        >
+                          {(user?.firstName?.[0] || "").toUpperCase()}
+                          {(user?.lastName?.[0] || "").toUpperCase()}
+                        </span>
+                      </span>
                     </span>
                   ) : (
                     <>
@@ -355,7 +400,7 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
                             logout();
                             setLoginDropdownOpen(false);
                           }}
-                          className="w-full border-t border-gray-border dark:border-gray-700 px-5 py-3.5 text-start text-sm text-gray-text hover:bg-gray-50 dark:hover:bg-dark/80"
+                          className="w-full border-t border-gray-border dark:border-gray-700 px-5 py-3.5 text-start text-sm text-gray-text hover:bg-gray-50 dark:hover:bg-dark/80 cursor-pointer"
                         >
                           {t("auth.logout")}
                         </button>
@@ -374,9 +419,15 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
                           </button>
                         </div>
                         <div className="px-3 pb-2">
-                          <button className="w-full rounded-md border border-gray-border dark:border-gray-600 py-2.5 text-xs font-semibold text-dark dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-dark/80">
+                          <a
+                            href={"https://qafila-b2b.bits3.com"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setLoginDropdownOpen(false)}
+                            className="block w-full rounded-md border border-gray-border dark:border-gray-600 py-2.5 text-center text-xs font-semibold text-dark dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-dark/80"
+                          >
                             {t("auth.becomeSeller")}
-                          </button>
+                          </a>
                         </div>
                         <div className="border-t border-gray-border dark:border-gray-700">
                           <Link
@@ -401,7 +452,13 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
         </div>
 
         {/* Navigation - hidden on mobile */}
-        <div className="relative hidden border-b border-gray-border dark:border-gray-700 md:block">
+        <div
+          className={`relative z-10 hidden border-b md:block ${
+            isPremium
+              ? "border-amber-400/20"
+              : "border-gray-border dark:border-gray-700"
+          }`}
+        >
           <div className="mx-auto flex max-w-360 items-center gap-1 px-6 py-2">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -416,7 +473,10 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
             </button>
             {(
               [
-                { href: "/tags/limited-editions", label: "nav.tagLimitedEditions" },
+                {
+                  href: "/tags/limited-editions",
+                  label: "nav.tagLimitedEditions",
+                },
                 { href: "/tags/luxuries", label: "nav.tagLuxuries" },
                 { href: "/tags/originals", label: "nav.tagOriginals" },
               ] as const
@@ -444,8 +504,13 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
             </Link>
             <Link
               href="/pricing"
-              className="ms-1 rounded-full bg-primary px-5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
+              className={`ms-1 flex items-center gap-1.5 rounded-full px-5 py-1.5 text-sm font-medium transition-colors ${
+                isPremium
+                  ? "premium-pill text-amber-950"
+                  : "bg-primary text-white hover:bg-primary-hover"
+              }`}
             >
+              {isPremium && <Crown size={14} className="fill-amber-950/90" />}
               {t("nav.priceAccess")}
             </Link>
           </div>
@@ -480,9 +545,17 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between border-b border-gray-border dark:border-gray-700 px-5 py-4">
-          <h2 className="text-base font-bold text-dark dark:text-gray-100">
-            {t("nav.menu")}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-dark dark:text-gray-100">
+              {t("nav.menu")}
+            </h2>
+            {isPremium && (
+              <span className="premium-pill flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold text-amber-950">
+                <Crown size={10} className="fill-amber-950/90" />
+                <span className="max-w-24 truncate">{planName}</span>
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             {/* Dark mode toggle - mobile */}
             <button
@@ -504,26 +577,10 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
 
         {/* Drawer Search */}
         <div className="px-5 pt-4 pb-2">
-          <div className="relative">
-            <Search
-              size={16}
-              className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-text"
-            />
-            <input
-              type="text"
-              value={drawerSearchValue}
-              onChange={(e) => setDrawerSearchValue(e.target.value)}
-              onFocus={() => setDrawerSearchFocused(true)}
-              onBlur={() => setDrawerSearchFocused(false)}
-              placeholder={
-                drawerSearchFocused
-                  ? t("search.placeholder")
-                  : `${drawerPlaceholder}|`
-              }
-              aria-label={t("search.placeholder")}
-              className="w-full rounded-full border border-gray-border bg-gray-light py-2.5 pe-4 ps-10 text-sm outline-none transition-colors focus:border-primary dark:bg-dark dark:border-gray-600 dark:text-gray-100 dark:placeholder:text-gray-400"
-            />
-          </div>
+          <SearchBox
+            layout="inline"
+            onNavigate={() => setMobileDrawerOpen(false)}
+          />
         </div>
 
         {/* Drawer Navigation Links */}
@@ -531,7 +588,10 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
           <ul className="space-y-1">
             {(
               [
-                { href: "/tags/limited-editions", label: "nav.tagLimitedEditions" },
+                {
+                  href: "/tags/limited-editions",
+                  label: "nav.tagLimitedEditions",
+                },
                 { href: "/tags/luxuries", label: "nav.tagLuxuries" },
                 { href: "/tags/originals", label: "nav.tagOriginals" },
               ] as const
@@ -565,9 +625,14 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
             <li>
               <Link
                 href="/pricing"
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-full text-center justify-center"
+                className={`flex items-center justify-center gap-2 rounded-full px-3 py-2.5 text-center text-sm font-medium ${
+                  isPremium
+                    ? "premium-pill text-amber-950"
+                    : "bg-primary text-white hover:bg-primary-hover"
+                }`}
                 onClick={() => setMobileDrawerOpen(false)}
               >
+                {isPremium && <Crown size={14} className="fill-amber-950/90" />}
                 {t("nav.priceAccess")}
               </Link>
             </li>

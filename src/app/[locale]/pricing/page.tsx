@@ -25,7 +25,7 @@ import LoginModal from "@/components/auth/LoginModal";
 // ── Static config ────────────────────────────────────────────────────────────
 const FEATURE_GROUPS: Record<string, { label: string; labelAr: string }> = {
   reviews: { label: "Reviews & Ratings", labelAr: "التقييمات والمراجعات" },
-  statista: { label: "Statista Insights", labelAr: "بيانات Statista" },
+  statistics: { label: "Statistics Insights", labelAr: "رؤى إحصائية" },
   aiResearch: { label: "AI Research", labelAr: "البحث بالذكاء الاصطناعي" },
   reports: { label: "Reports & Exports", labelAr: "التقارير والتصدير" },
   licenses: { label: "Licenses & Sharing", labelAr: "التراخيص والمشاركة" },
@@ -509,7 +509,7 @@ export default function PricingPage() {
   const featureGroups = groupFeatureKeys(sortedPlans);
   const groupOrder = [
     "reviews",
-    "statista",
+    "statistics",
     "aiResearch",
     "reports",
     "licenses",
@@ -556,7 +556,7 @@ export default function PricingPage() {
       ? "تواصل مع فريقنا للحصول على أسعار للمؤسسات، تراخيص جماعية، أو أي استفسار."
       : "Talk to our team about enterprise pricing, bulk licenses, or anything you'd like to ask.",
     contact: isAr ? "تواصل معنا" : "Contact us",
-    trust1Title: isAr ? "بيانات Statista" : "Statista intelligence",
+    trust1Title: isAr ? "بيانات إحصائية" : "Statistics intelligence",
     trust1Sub: isAr
       ? "تقارير وأرقام من أكبر بنوك البيانات في العالم."
       : "Reports and figures from the world's leading data bank.",

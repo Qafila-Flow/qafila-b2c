@@ -236,6 +236,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           brand: getLocalizedField(product.brand, locale),
           material: getLocalizedField(product.material, locale),
           pattern: getLocalizedField(product.pattern, locale),
+          tags: product.tags ?? [],
         }}
         colors={colors}
         sizes={sizes}

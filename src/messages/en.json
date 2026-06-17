@@ -16,6 +16,10 @@
     "researchAI": "Research AI",
     "menu": "Menu"
   },
+  "premium": {
+    "member": "Gold Member",
+    "badge": "GOLD"
+  },
   "research": {
     "heroTitle1": "Empowering",
     "heroTitle2": "people with data",
@@ -37,7 +41,19 @@
       "Search for \"Smartphones\"",
       "Search for \"Sneakers\"",
       "Search for \"Skincare\""
-    ]
+    ],
+    "ariaLabel": "Search products",
+    "searchFor": "Search for",
+    "viewAll": "View all results for \"{query}\"",
+    "products": "Products",
+    "recent": "Recent searches",
+    "clearRecent": "Clear",
+    "clear": "Clear",
+    "popular": "Popular searches",
+    "noResults": "No matches for \"{query}\"",
+    "noResultsHint": "Check the spelling or try a more general term.",
+    "resultsFor": "Results for \"{query}\"",
+    "allProducts": "All products"
   },
   "header": {
     "stories": "Stories",

@@ -96,10 +96,14 @@ export function useFilters() {
   );
 
   const clearAllFilters = useCallback(() => {
+    // Preserve the search query (if any) when clearing filters — only the
+    // filter facets should be reset, not the term the user searched for.
+    const q = searchParams.get("q");
+    const url = q ? `${pathname}?q=${encodeURIComponent(q)}` : pathname;
     startTransition(() => {
-      router.replace(pathname, { scroll: false });
+      router.replace(url, { scroll: false });
     });
-  }, [pathname, router]);
+  }, [pathname, router, searchParams]);
 
   const hasActiveFilters = FILTER_KEYS.some(
     (key) => key !== "page" && key !== "sortBy" && key !== "sortOrder" && searchParams.has(key),

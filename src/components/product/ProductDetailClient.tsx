@@ -12,9 +12,11 @@ import SizeSelector from "./SizeSelector";
 import type { SizeOption } from "./SizeSelector";
 import QuantityPicker from "./QuantityPicker";
 import ProductInfoTabs from "./ProductInfoTabs";
+import ProductTags from "./ProductTags";
 import ReviewsSection from "./ReviewsSection";
 import type { ReviewData } from "./ReviewCard";
 import type { Product } from "@/components/shared/ProductCard";
+import type { ProductTag } from "@/lib/api/products";
 import ProductCard from "@/components/shared/ProductCard";
 import VendorBanner from "./VendorBanner";
 import type { VendorData } from "./VendorBanner";
@@ -54,6 +56,7 @@ interface ProductData {
   brand: string | null;
   material: string | null;
   pattern: string | null;
+  tags: ProductTag[];
 }
 
 interface Props {
@@ -295,6 +298,9 @@ export default function ProductDetailClient({
               </p>
             )}
           </div>
+
+          {/* Tags */}
+          <ProductTags tags={product.tags} />
 
           {/* Rating summary */}
           <div className="flex items-center gap-2">

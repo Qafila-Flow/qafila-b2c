@@ -5,6 +5,24 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  // Serialize array params as comma-joined values (e.g. ?tags=ORIGINALS,LUXURIES)
+  // instead of Axios's default bracket form (?tags[]=ORIGINALS). The backend's
+  // whitelist validation only recognizes the bracket-less `key`, so the bracketed
+  // form is stripped and the filter is silently ignored — making every tag/color/
+  // size filter return ALL products. The API splits these comma lists server-side.
+  paramsSerializer: (params: Record<string, unknown>) => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value === undefined || value === null) continue;
+      if (Array.isArray(value)) {
+        const items = value.filter((v) => v !== undefined && v !== null);
+        if (items.length > 0) search.append(key, items.join(","));
+      } else {
+        search.append(key, String(value));
+      }
+    }
+    return search.toString();
+  },
 });
 
 // Request interceptor — attach auth token when available

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Heart, Star, TrendingUp, Crown, Gem, Award } from "lucide-react";
+import { Heart, Star, TrendingUp } from "lucide-react";
 import SarIcon from "@/components/shared/SarIcon";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth-context";
 import { getMediaUrl } from "@/lib/utils";
 import { useState } from "react";
 import type { ProductTag } from "@/lib/api/products";
+import { TAG_STYLES, TAG_PRIORITY } from "@/lib/product-tags";
 
 export interface Product {
   id: string;
@@ -26,33 +27,6 @@ export interface Product {
   slug?: string | null;
   tags?: ProductTag[];
 }
-
-const TAG_STYLES: Record<
-  ProductTag,
-  {
-    icon: typeof Crown;
-    /** Solid gradient pill — readable on any photo background */
-    pill: string;
-    /** i18n key under `productTag.<key>` */
-    key: "limitedEditions" | "luxuries" | "originals";
-  }
-> = {
-  LIMITED_EDITIONS: {
-    icon: Crown,
-    pill: "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-900/30 ring-1 ring-white/20",
-    key: "limitedEditions",
-  },
-  LUXURIES: {
-    icon: Gem,
-    pill: "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-900/30 ring-1 ring-white/20",
-    key: "luxuries",
-  },
-  ORIGINALS: {
-    icon: Award,
-    pill: "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-900/30 ring-1 ring-white/20",
-    key: "originals",
-  },
-};
 
 export default function ProductCard({
   product,
@@ -75,15 +49,9 @@ export default function ProductCard({
   // the prominent top-start slot (when no sale badge is competing for it).
   // Any remaining tags render as a uniform pill row along the bottom edge,
   // which keeps contrast consistent across photo backgrounds.
-  const tagPriority: ProductTag[] = [
-    "LIMITED_EDITIONS",
-    "LUXURIES",
-    "ORIGINALS",
-  ];
-  const primaryTag =
-    tagPriority.find((tg) => tags.includes(tg)) ?? null;
+  const primaryTag = TAG_PRIORITY.find((tg) => tags.includes(tg)) ?? null;
   const showPrimaryPill = primaryTag !== null && !product.badge;
-  const orderedTags = tagPriority.filter((tg) => tags.includes(tg));
+  const orderedTags = TAG_PRIORITY.filter((tg) => tags.includes(tg));
   const bottomTags = showPrimaryPill
     ? orderedTags.filter((tg) => tg !== primaryTag)
     : orderedTags;

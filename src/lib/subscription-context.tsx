@@ -16,6 +16,8 @@ interface SubscriptionContextValue {
   subscription: Subscription | null;
   usage: UsageSummary[];
   isLoading: boolean;
+  /** True when the user has an active, paid (non-free) subscription. */
+  isPremium: boolean;
   refreshSubscription: () => Promise<void>;
   /** Returns true if the feature boolean is enabled or limit > 0 (or -1 = unlimited) */
   hasFeature: (featureKey: string) => boolean;
@@ -23,7 +25,9 @@ interface SubscriptionContextValue {
   getUsageFor: (featureKey: string) => UsageSummary | null;
 }
 
-const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
+const SubscriptionContext = createContext<SubscriptionContextValue | null>(
+  null,
+);
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { isLoggedIn } = useAuth();
@@ -80,12 +84,34 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     [usage],
   );
 
+  // A user is "premium" when they hold a (non-cancelled/expired) subscription
+  // to a PAID plan. We check several signals because the API may return prices
+  // as strings, omit them, or leave `billingCycle` at its DB default of FREE
+  // even on a paid plan. The free tier is "Basic" (priceMonthly null / tier
+  // "Basic"); any other tier or a positive price counts as paid.
+  const plan = subscription?.plan;
+  const tier = String(plan?.tier ?? "")
+    .trim()
+    .toLowerCase();
+  const isPaidPlan = Boolean(
+    Number(plan?.priceMonthly ?? 0) > 0 ||
+      Number(plan?.priceAnnually ?? 0) > 0 ||
+      subscription?.billingCycle === "MONTHLY" ||
+      subscription?.billingCycle === "ANNUALLY" ||
+      (tier !== "" && tier !== "basic" && tier !== "free"),
+  );
+  const status = subscription?.status;
+  const isPremium = Boolean(
+    subscription && status !== "CANCELLED" && status !== "EXPIRED" && isPaidPlan,
+  );
+
   return (
     <SubscriptionContext.Provider
       value={{
         subscription,
         usage,
         isLoading,
+        isPremium,
         refreshSubscription: fetchSubscription,
         hasFeature,
         getUsageFor,
@@ -99,7 +125,9 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 export function useSubscription(): SubscriptionContextValue {
   const ctx = useContext(SubscriptionContext);
   if (!ctx) {
-    throw new Error("useSubscription must be used inside <SubscriptionProvider>");
+    throw new Error(
+      "useSubscription must be used inside <SubscriptionProvider>",
+    );
   }
   return ctx;
 }

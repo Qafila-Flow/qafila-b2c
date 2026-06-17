@@ -104,7 +104,7 @@ export default async function QafilaLabVendorPage({
   const rating = vendor.rating ? Number(vendor.rating) : null;
 
   return (
-    <div className="bg-white pb-16">
+    <div className="bg-white pb-16 dark:bg-[#0f0f0f]">
       {/* Hero — full-width banner with overlaid logo + brand info */}
       <section className="relative h-[480px] w-full overflow-hidden md:h-[560px]">
         {bannerUrl ? (
@@ -192,19 +192,21 @@ export default async function QafilaLabVendorPage({
       {/* Products — clean grid, no filters */}
       <section className="mx-auto max-w-360 px-4 pt-12 sm:px-6 md:px-20">
         <div className="mb-6 flex items-baseline justify-between gap-4">
-          <h2 className="font-serif text-2xl font-bold text-dark md:text-3xl">
+          <h2 className="font-serif text-2xl font-bold text-dark md:text-3xl dark:text-gray-100">
             {t("collection")}
           </h2>
           {productsRes.meta.total > 0 && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {t("productsCount", { count: productsRes.meta.total })}
             </p>
           )}
         </div>
 
         {products.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 py-20 text-center">
-            <p className="text-sm text-gray-500">{t("noProducts")}</p>
+          <div className="rounded-2xl border border-dashed border-gray-200 py-20 text-center dark:border-gray-700">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t("noProducts")}
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
@@ -220,12 +222,12 @@ export default async function QafilaLabVendorPage({
             {page > 1 && (
               <Link
                 href={`/qafila-lab/${slug}?page=${page - 1}`}
-                className="rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-dark transition hover:border-amber-400 hover:text-amber-700"
+                className="rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-dark transition hover:border-amber-400 hover:text-amber-700 dark:border-gray-700 dark:text-gray-200 dark:hover:border-amber-500/60 dark:hover:text-amber-300"
               >
                 {t("prev")}
               </Link>
             )}
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               {t("pageOf", {
                 page,
                 total: productsRes.meta.totalPages,
@@ -234,7 +236,7 @@ export default async function QafilaLabVendorPage({
             {page < productsRes.meta.totalPages && (
               <Link
                 href={`/qafila-lab/${slug}?page=${page + 1}`}
-                className="rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-dark transition hover:border-amber-400 hover:text-amber-700"
+                className="rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-dark transition hover:border-amber-400 hover:text-amber-700 dark:border-gray-700 dark:text-gray-200 dark:hover:border-amber-500/60 dark:hover:text-amber-300"
               >
                 {t("next")}
               </Link>
