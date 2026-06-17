@@ -479,6 +479,7 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
                 },
                 { href: "/tags/luxuries", label: "nav.tagLuxuries" },
                 { href: "/tags/originals", label: "nav.tagOriginals" },
+                { href: "/tags/saudi-made", label: "nav.tagSaudiMade" },
               ] as const
             ).map(({ href, label }) => {
               const isActive = pathname === href;
@@ -594,6 +595,7 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
                 },
                 { href: "/tags/luxuries", label: "nav.tagLuxuries" },
                 { href: "/tags/originals", label: "nav.tagOriginals" },
+                { href: "/tags/saudi-made", label: "nav.tagSaudiMade" },
               ] as const
             ).map(({ href, label }) => {
               const isActive = pathname === href;

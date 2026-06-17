@@ -1,12 +1,17 @@
 import apiClient from "./client";
 import type { PaginatedResponse } from "./types";
 
-export type ProductTag = "LIMITED_EDITIONS" | "LUXURIES" | "ORIGINALS";
+export type ProductTag =
+  | "LIMITED_EDITIONS"
+  | "LUXURIES"
+  | "ORIGINALS"
+  | "SAUDI_MADE";
 
 export const PRODUCT_TAGS: ProductTag[] = [
   "LIMITED_EDITIONS",
   "LUXURIES",
   "ORIGINALS",
+  "SAUDI_MADE",
 ];
 
 export interface ApiProductColor {

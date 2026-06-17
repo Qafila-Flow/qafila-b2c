@@ -12,6 +12,7 @@
     "tagLimitedEditions": "إصدارات محدودة",
     "tagLuxuries": "كماليات",
     "tagOriginals": "أصلية",
+    "tagSaudiMade": "صنع في السعودية",
     "priceAccess": "السعر والوصول",
     "researchAI": "بحث AI",
     "menu": "القائمة"
@@ -119,7 +120,8 @@
   "productTag": {
     "limitedEditions": "إصدار محدود",
     "luxuries": "كماليات",
-    "originals": "أصلي"
+    "originals": "أصلي",
+    "saudiMade": "صنع في السعودية"
   },
   "productTagPage": {
     "eyebrow": "مجموعة مختارة",

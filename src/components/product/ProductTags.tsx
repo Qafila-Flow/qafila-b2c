@@ -2,10 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import type { ProductTag } from "@/lib/api/products";
-import { TAG_STYLES, TAG_PRIORITY } from "@/lib/product-tags";
+import { TAG_STYLES, TAG_PRIORITY, SAUDI_MADE_SEAL } from "@/lib/product-tags";
 
 /**
- * Renders a product's tags as a row of gradient pills.
+ * Renders a product's tags as a row of gradient pills, with the "Saudi Made"
+ * seal shown as an image badge ahead of them.
  * Returns nothing when the product has no tags.
  */
 export default function ProductTags({
@@ -17,10 +18,21 @@ export default function ProductTags({
 }) {
   const tt = useTranslations("productTag");
   const ordered = TAG_PRIORITY.filter((tg) => tags.includes(tg));
-  if (ordered.length === 0) return null;
+  const hasSaudiMade = tags.includes("SAUDI_MADE");
+  if (ordered.length === 0 && !hasSaudiMade) return null;
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
+      {hasSaudiMade && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={SAUDI_MADE_SEAL}
+          alt={tt("saudiMade")}
+          width={52}
+          height={35}
+          className="h-7 w-auto drop-shadow-sm"
+        />
+      )}
       {ordered.map((tg) => {
         const style = TAG_STYLES[tg];
         const Icon = style.icon;

@@ -10,7 +10,7 @@ import { useAuth } from "@/lib/auth-context";
 import { getMediaUrl } from "@/lib/utils";
 import { useState } from "react";
 import type { ProductTag } from "@/lib/api/products";
-import { TAG_STYLES, TAG_PRIORITY } from "@/lib/product-tags";
+import { TAG_STYLES, TAG_PRIORITY, SAUDI_MADE_SEAL } from "@/lib/product-tags";
 
 export interface Product {
   id: string;
@@ -45,12 +45,17 @@ export default function ProductCard({
   const tt = useTranslations("productTag");
   const wishlisted = isInWishlist(product.id);
   const tags = product.tags ?? [];
+  // The "Saudi Made" seal is an image badge that owns the top-start corner.
+  // When present it stacks below any sale badge and suppresses the marketing
+  // text-pill there, so the two never overlap.
+  const hasSaudiMade = tags.includes("SAUDI_MADE");
   // Priority: Limited > Luxuries > Originals — the highest-priority tag claims
-  // the prominent top-start slot (when no sale badge is competing for it).
-  // Any remaining tags render as a uniform pill row along the bottom edge,
-  // which keeps contrast consistent across photo backgrounds.
+  // the prominent top-start slot (when neither a sale badge nor the Saudi-Made
+  // seal is competing for it). Any remaining tags render as a uniform pill row
+  // along the bottom edge, which keeps contrast consistent across photos.
   const primaryTag = TAG_PRIORITY.find((tg) => tags.includes(tg)) ?? null;
-  const showPrimaryPill = primaryTag !== null && !product.badge;
+  const showPrimaryPill =
+    primaryTag !== null && !product.badge && !hasSaudiMade;
   const orderedTags = TAG_PRIORITY.filter((tg) => tags.includes(tg));
   const bottomTags = showPrimaryPill
     ? orderedTags.filter((tg) => tg !== primaryTag)
@@ -99,6 +104,23 @@ export default function ProductCard({
             );
           })()
         ) : null}
+
+        {/* Saudi-Made seal — image badge in the top-start corner. Stacks below
+            a sale badge when one is present so the two never overlap.
+            Plain <img>: the SVG lives in /public and would 404 through the
+            next/image optimizer (dangerouslyAllowSVG is off). */}
+        {hasSaudiMade && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={SAUDI_MADE_SEAL}
+            alt={tt("saudiMade")}
+            width={46}
+            height={31}
+            className={`absolute start-2.5 z-10 h-auto w-11 drop-shadow-md ${
+              product.badge ? "top-9" : "top-2.5"
+            }`}
+          />
+        )}
 
         {/* Top-end: wishlist only — kept clean and isolated */}
         <button

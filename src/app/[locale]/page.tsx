@@ -14,8 +14,10 @@ import AppDownload from "@/components/home/AppDownload";
 import { getForYou, getBestSellers } from "@/lib/api/recommendations";
 import { getQafilaLabVendors, type VendorProfile } from "@/lib/api/vendors";
 import { getActiveBanners, type Banner } from "@/lib/api/banners";
+import { getProducts, type ApiProduct } from "@/lib/api/products";
 import type { RecommendationProduct } from "@/types/product";
 import type { Product } from "@/components/shared/ProductCard";
+import { getMediaUrl } from "@/lib/utils";
 
 function mapProduct(item: RecommendationProduct, locale: string): Product {
   const hasSale = item.salePrice != null && item.salePrice < item.price;
@@ -49,6 +51,46 @@ function mapProduct(item: RecommendationProduct, locale: string): Product {
   };
 }
 
+// Maps a full ApiProduct (from /products) — the Saudi-Made banner pulls from
+// the products endpoint filtered by tag, not the recommendations feed.
+function mapApiProduct(item: ApiProduct, locale: string): Product {
+  const price = Number(item.price);
+  const salePrice = item.salePrice != null ? Number(item.salePrice) : null;
+  const hasSale = salePrice != null && salePrice < price;
+  const displayPrice = hasSale ? salePrice! : price;
+  const originalPrice = hasSale ? price : null;
+  const discount = hasSale
+    ? Math.round(((price - salePrice!) / price) * 100)
+    : null;
+
+  const name =
+    locale === "ar"
+      ? item.brand?.nameAr || item.brand?.name || item.titleAr || item.title
+      : item.brand?.name || item.title;
+
+  const description = locale === "ar" ? item.titleAr || item.title : item.title;
+
+  const imageUrl = item.images?.[0]?.url
+    ? getMediaUrl(item.images[0].url)
+    : null;
+
+  return {
+    id: item.id,
+    name,
+    description,
+    price: displayPrice,
+    originalPrice,
+    discount,
+    rating: Number(item.averageRating),
+    reviews: item.reviewCount,
+    trending: item.isFeatured,
+    badge: hasSale ? `${discount}%` : null,
+    image: imageUrl,
+    slug: item.slug,
+    tags: item.tags ?? [],
+  };
+}
+
 export default async function HomePage({
   params,
 }: {
@@ -59,20 +101,28 @@ export default async function HomePage({
 
   let forYouProducts: Product[] = [];
   let bestSellerProducts: Product[] = [];
+  let saudiMadeProducts: Product[] = [];
   let qafilaLabVendors: VendorProfile[] = [];
   let banners: Banner[] = [];
 
   try {
-    const [forYouRes, bestSellersRes, qafilaLabRes, bannersRes] =
+    const [forYouRes, bestSellersRes, saudiMadeRes, qafilaLabRes, bannersRes] =
       await Promise.all([
         getForYou({ limit: 10 }),
         getBestSellers({ limit: 10 }),
+        getProducts({ tags: ["SAUDI_MADE"], limit: 10 }).catch(() => ({
+          data: [] as ApiProduct[],
+          meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+        })),
         getQafilaLabVendors({ limit: 8 }).catch(() => ({ vendors: [] })),
         getActiveBanners().catch(() => [] as Banner[]),
       ]);
     forYouProducts = forYouRes.data.map((item) => mapProduct(item, locale));
     bestSellerProducts = bestSellersRes.data.map((item) =>
       mapProduct(item, locale),
+    );
+    saudiMadeProducts = saudiMadeRes.data.map((item) =>
+      mapApiProduct(item, locale),
     );
     qafilaLabVendors = qafilaLabRes.vendors ?? [];
     banners = bannersRes;
@@ -85,7 +135,7 @@ export default async function HomePage({
       <HeroBanner banners={banners} />
       <CategoryCarousel />
       <RecommendedBanner products={forYouProducts} />
-      <SaudiMadeBanner products={forYouProducts} />
+      <SaudiMadeBanner products={saudiMadeProducts} />
       <QafilaLabSection vendors={qafilaLabVendors} locale={locale} />
       <BestSeller products={bestSellerProducts} />
       <AppDownload />

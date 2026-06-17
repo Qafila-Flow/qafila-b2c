@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { PackageSearch, Crown, Gem, Award } from "lucide-react";
+import { PackageSearch, Crown, Gem, Award, BadgeCheck } from "lucide-react";
 import { getProducts } from "@/lib/api/products";
 import type { ApiProduct, ProductTag } from "@/lib/api/products";
 import { getMediaUrl } from "@/lib/utils";
@@ -11,6 +11,7 @@ const SLUG_TO_TAG: Record<string, ProductTag> = {
   "limited-editions": "LIMITED_EDITIONS",
   luxuries: "LUXURIES",
   originals: "ORIGINALS",
+  "saudi-made": "SAUDI_MADE",
 };
 
 const TAG_THEME: Record<
@@ -19,7 +20,7 @@ const TAG_THEME: Record<
     icon: typeof Crown;
     gradient: string;
     glow: string;
-    titleKey: "limitedEditions" | "luxuries" | "originals";
+    titleKey: "limitedEditions" | "luxuries" | "originals" | "saudiMade";
   }
 > = {
   LIMITED_EDITIONS: {
@@ -39,6 +40,12 @@ const TAG_THEME: Record<
     gradient: "from-emerald-600 to-teal-600",
     glow: "shadow-emerald-500/30",
     titleKey: "originals",
+  },
+  SAUDI_MADE: {
+    icon: BadgeCheck,
+    gradient: "from-green-700 to-green-900",
+    glow: "shadow-green-800/30",
+    titleKey: "saudiMade",
   },
 };
 
