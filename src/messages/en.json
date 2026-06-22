@@ -321,6 +321,7 @@
     "youMayAlsoLike": "You May Also Like",
     "followers": "{count} Followers",
     "follow": "Follow",
+    "following": "Following",
     "vendorVerified": "Verified"
   },
   "profile": {
@@ -550,6 +551,7 @@
     "emptyDescription": "Check back later for new stories from vendors.",
     "views": "views",
     "follow": "Follow",
+    "following": "Following",
     "writeComment": "Write a comment...",
     "addComment": "Add Comment ...",
     "viewAllComments": "View all {count} comments",

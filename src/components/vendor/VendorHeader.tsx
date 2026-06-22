@@ -1,12 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { BadgeCheck, Star, Store } from "lucide-react";
 import Image from "next/image";
 import { getMediaUrl } from "@/lib/utils";
-import { useAuth } from "@/lib/auth-context";
-import { followVendor, unfollowVendor } from "@/lib/api/vendors";
+import { useFollowVendor } from "@/lib/hooks/useFollowVendor";
 import type { VendorProfile } from "@/lib/api/vendors";
 
 function formatFollowers(count: number): string {
@@ -29,11 +27,13 @@ export default function VendorHeader({
   onRequireLogin,
 }: VendorHeaderProps) {
   const t = useTranslations("vendor");
-  const { isLoggedIn } = useAuth();
 
-  const [isFollowing, setIsFollowing] = useState(vendor.isFollowing ?? false);
-  const [followerCount, setFollowerCount] = useState(vendor.followerCount);
-  const [followLoading, setFollowLoading] = useState(false);
+  const { isFollowing, followerCount, loading, toggleFollow } = useFollowVendor({
+    vendorId: vendor.id,
+    initialFollowing: vendor.isFollowing ?? false,
+    initialFollowerCount: vendor.followerCount,
+    onRequireLogin,
+  });
 
   const storeName =
     locale === "ar" ? vendor.storeNameAr || vendor.storeName : vendor.storeName;
@@ -42,30 +42,6 @@ export default function VendorHeader({
   const hasHalf = rating - fullStars >= 0.5;
   const logoUrl = getMediaUrl(vendor.logo);
   const bannerUrl = getMediaUrl(vendor.banner);
-
-  const handleFollow = async () => {
-    if (!isLoggedIn) {
-      onRequireLogin();
-      return;
-    }
-    if (followLoading) return;
-    setFollowLoading(true);
-    try {
-      if (isFollowing) {
-        await unfollowVendor(vendor.id);
-        setIsFollowing(false);
-        setFollowerCount((c) => Math.max(0, c - 1));
-      } else {
-        await followVendor(vendor.id);
-        setIsFollowing(true);
-        setFollowerCount((c) => c + 1);
-      }
-    } catch {
-      // silently fail
-    } finally {
-      setFollowLoading(false);
-    }
-  };
 
   return (
     <div>
@@ -147,8 +123,8 @@ export default function VendorHeader({
 
         {/* Follow button */}
         <button
-          onClick={handleFollow}
-          disabled={followLoading}
+          onClick={toggleFollow}
+          disabled={loading}
           className={`shrink-0 rounded-full px-6 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${
             isFollowing
               ? "border border-gray-border dark:border-gray-700 bg-white dark:bg-dark text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"

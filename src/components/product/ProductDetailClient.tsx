@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import SarIcon from "@/components/shared/SarIcon";
@@ -29,6 +29,7 @@ import {
   getReviewStats,
   type GetReviewsParams,
 } from "@/lib/api/reviews";
+import { getProductById } from "@/lib/api/products";
 interface ProductImage {
   id: string;
   url: string;
@@ -122,6 +123,40 @@ export default function ProductDetailClient({
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
   const [togglingWishlist, setTogglingWishlist] = useState(false);
+  // The product page is server-rendered without the user's token, so the
+  // server can't tell us whether this user follows the vendor. Re-fetch the
+  // product on the client (the API client attaches the token) to hydrate the
+  // real follow state for the banner.
+  const [vendorFollow, setVendorFollow] = useState<{
+    isFollowing: boolean;
+    followersCount?: number;
+  } | null>(null);
+
+  const vendorId = vendor?.id;
+  useEffect(() => {
+    if (!isLoggedIn || !vendorId) return;
+    let active = true;
+    getProductById(product.id)
+      .then((res) => {
+        if (!active || !res.vendor) return;
+        setVendorFollow({
+          isFollowing: res.vendor.isFollowing ?? false,
+          followersCount: res.vendor.followerCount,
+        });
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [isLoggedIn, vendorId, product.id]);
+
+  const bannerVendor: VendorData | null = vendor
+    ? {
+        ...vendor,
+        isFollowing: vendorFollow?.isFollowing ?? vendor.isFollowing,
+        followersCount: vendorFollow?.followersCount ?? vendor.followersCount,
+      }
+    : null;
 
   const wishlisted = isInWishlist(product.id);
 
@@ -491,7 +526,13 @@ export default function ProductDetailClient({
       )}
 
       {/* Vendor banner */}
-      {vendor && <VendorBanner vendor={vendor} />}
+      {bannerVendor && (
+        <VendorBanner
+          key={vendorFollow ? "follow-hydrated" : "follow-initial"}
+          vendor={bannerVendor}
+          onRequireLogin={handleRequireLogin}
+        />
+      )}
 
       {/* Login modal */}
       <LoginModal

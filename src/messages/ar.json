@@ -321,6 +321,7 @@
     "youMayAlsoLike": "قد يعجبك أيضاً",
     "followers": "{count} متابع",
     "follow": "متابعة",
+    "following": "متابَع",
     "vendorVerified": "موثق"
   },
   "profile": {
@@ -550,6 +551,7 @@
     "emptyDescription": "تحقق لاحقاً من القصص الجديدة من المتاجر.",
     "views": "مشاهدة",
     "follow": "متابعة",
+    "following": "متابَع",
     "writeComment": "اكتب تعليقاً...",
     "addComment": "أضف تعليقاً ...",
     "viewAllComments": "عرض جميع التعليقات ({count})",

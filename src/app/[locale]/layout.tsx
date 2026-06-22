@@ -58,7 +58,12 @@ export default async function LocaleLayout({
   const initialSlug = rootCategories[0]?.slug ?? "";
 
   return (
-    <html lang={locale} dir={dir} className={cairo.variable}>
+    <html
+      lang={locale}
+      dir={dir}
+      className={cairo.variable}
+      suppressHydrationWarning
+    >
       {/* Prevent flash of wrong theme */}
       <head>
         <script

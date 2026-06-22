@@ -28,6 +28,7 @@ import { getProductById, type ApiProduct } from "@/lib/api/products";
 import { useCart } from "@/lib/cart-context";
 import { useAuth } from "@/lib/auth-context";
 import StoryComments from "./StoryComments";
+import StoryFollowButton from "./StoryFollowButton";
 import type { Story, StoryComment } from "@/types/story";
 
 interface StoryViewerProps {
@@ -419,9 +420,11 @@ export default function StoryViewer({
               {paused ? <Play size={18} /> : <Pause size={18} />}
             </button>
 
-            <button className="rounded-full border border-white px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white hover:text-dark">
-              {t("follow")}
-            </button>
+            <StoryFollowButton
+              key={`${story.vendorId}:${story.vendor.isFollowing ?? "u"}`}
+              vendorId={story.vendorId}
+              initialFollowing={story.vendor.isFollowing}
+            />
           </div>
         </div>
 

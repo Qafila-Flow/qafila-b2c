@@ -4,6 +4,7 @@ export interface StoryVendor {
   storeNameAr: string;
   slug: string;
   logo: string | null;
+  isFollowing?: boolean;
 }
 
 export interface Story {

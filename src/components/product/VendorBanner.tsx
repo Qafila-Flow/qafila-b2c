@@ -1,8 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { BadgeCheck, Star, Store } from "lucide-react";
+import { useFollowVendor } from "@/lib/hooks/useFollowVendor";
 
 export interface VendorData {
   id: string;
@@ -11,10 +13,14 @@ export interface VendorData {
   logo?: string | null;
   followersCount?: number;
   averageRating?: number;
+  reviewCount?: number;
+  isVerified?: boolean;
+  isFollowing?: boolean;
 }
 
 interface Props {
   vendor: VendorData;
+  onRequireLogin?: () => void;
 }
 
 function formatFollowers(count: number): string {
@@ -25,8 +31,15 @@ function formatFollowers(count: number): string {
   return String(count);
 }
 
-export default function VendorBanner({ vendor }: Props) {
+export default function VendorBanner({ vendor, onRequireLogin }: Props) {
   const t = useTranslations("productDetail");
+
+  const { isFollowing, followerCount, loading, toggleFollow } = useFollowVendor({
+    vendorId: vendor.id,
+    initialFollowing: vendor.isFollowing ?? false,
+    initialFollowerCount: vendor.followersCount ?? 0,
+    onRequireLogin,
+  });
 
   const rating = vendor.averageRating ?? 0;
   const fullStars = Math.floor(rating);
@@ -39,12 +52,14 @@ export default function VendorBanner({ vendor }: Props) {
         className="flex items-center gap-4 rounded-xl bg-[#FFF5EB] dark:bg-dark px-5 py-4 transition-shadow hover:shadow-md"
       >
         {/* Avatar */}
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
           {vendor.logo ? (
-            <img
+            <Image
               src={vendor.logo}
               alt={vendor.storeName}
-              className="h-full w-full object-cover"
+              fill
+              sizes="56px"
+              className="object-cover"
             />
           ) : (
             <Store size={24} className="text-gray-400" />
@@ -57,19 +72,24 @@ export default function VendorBanner({ vendor }: Props) {
             <span className="truncate text-sm font-bold text-dark dark:text-gray-100">
               {vendor.storeName}
             </span>
-            <BadgeCheck size={16} className="shrink-0 fill-blue-500 text-white" />
+            {vendor.isVerified && (
+              <BadgeCheck
+                size={16}
+                className="shrink-0 fill-blue-500 text-white"
+              />
+            )}
           </div>
 
           <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-text">
             {vendor.followersCount != null && (
-              <>
-                <span>
-                  {t("followers", {
-                    count: formatFollowers(vendor.followersCount),
-                  })}
-                </span>
-                <span className="text-gray-300">|</span>
-              </>
+              <span>
+                {t("followers", {
+                  count: formatFollowers(followerCount),
+                })}
+              </span>
+            )}
+            {vendor.followersCount != null && rating > 0 && (
+              <span className="text-gray-300">|</span>
             )}
             {rating > 0 && (
               <span className="flex items-center gap-1">
@@ -89,6 +109,9 @@ export default function VendorBanner({ vendor }: Props) {
                     />
                   ))}
                 </span>
+                {vendor.reviewCount != null && vendor.reviewCount > 0 && (
+                  <span className="text-gray-text">({vendor.reviewCount})</span>
+                )}
               </span>
             )}
           </div>
@@ -99,11 +122,18 @@ export default function VendorBanner({ vendor }: Props) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            // TODO: follow/unfollow API
+            toggleFollow();
           }}
-          className="shrink-0 rounded-full border border-dark dark:border-gray-500 px-5 py-1.5 text-xs font-semibold text-dark dark:text-gray-200 transition-colors hover:bg-dark hover:text-white dark:hover:bg-gray-700"
+          disabled={loading}
+          aria-pressed={isFollowing}
+          aria-label={isFollowing ? t("following") : t("follow")}
+          className={`shrink-0 rounded-full border px-5 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${
+            isFollowing
+              ? "border-dark bg-dark text-white dark:border-gray-500 dark:bg-gray-700"
+              : "border-dark text-dark hover:bg-dark hover:text-white dark:border-gray-500 dark:text-gray-200 dark:hover:bg-gray-700"
+          }`}
         >
-          {t("follow")}
+          {isFollowing ? t("following") : t("follow")}
         </button>
       </Link>
     </section>

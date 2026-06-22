@@ -261,6 +261,15 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     ? product.vendor.storeNameAr || product.vendor.storeName
                     : product.vendor.storeName,
                 slug: product.vendor.slug,
+                logo: getMediaUrl(product.vendor.logo),
+                averageRating:
+                  product.vendor.rating != null
+                    ? Number(product.vendor.rating)
+                    : undefined,
+                reviewCount: product.vendor.reviewCount,
+                isVerified: product.vendor.isVerified,
+                followersCount: product.vendor.followerCount,
+                isFollowing: product.vendor.isFollowing,
               }
             : null
         }

@@ -115,6 +115,12 @@ export interface ApiProduct {
     storeName: string;
     storeNameAr: string;
     slug: string;
+    logo?: string | null;
+    rating?: string | null;
+    reviewCount?: number;
+    isVerified?: boolean;
+    followerCount?: number;
+    isFollowing?: boolean;
   } | null;
   colors: ApiProductColor[];
   sizes: ApiProductSize[];

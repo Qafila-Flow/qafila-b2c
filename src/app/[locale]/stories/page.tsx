@@ -21,7 +21,7 @@ export default async function StoriesPage() {
     <div className="mx-auto max-w-360 px-6 py-4">
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-4 py-3">
-        <ol className="flex flex-wrap items-center gap-1 text-xs text-gray-text">
+        <ol className="flex flex-wrap items-center gap-1 text-xs text-gray-text dark:text-gray-400">
           <li>
             <Link href="/" className="hover:text-primary">
               {tCat("home")}
@@ -29,13 +29,13 @@ export default async function StoriesPage() {
           </li>
           <li className="flex items-center gap-1">
             <ChevronRight size={12} className="rtl:rotate-180" />
-            <span className="font-medium text-dark">{t("title")}</span>
+            <span className="font-medium text-dark dark:text-gray-100">{t("title")}</span>
           </li>
         </ol>
       </nav>
 
       {/* Page title */}
-      <h1 className="mb-6 text-2xl font-bold text-dark">{t("title")}</h1>
+      <h1 className="mb-6 text-2xl font-bold text-dark dark:text-gray-100">{t("title")}</h1>
 
       {/* Stories grid */}
       <StoriesPageClient groupedStories={groupedStories} />
