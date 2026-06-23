@@ -43,6 +43,12 @@ const SEGMENT_CONFIG: Record<PlanSegment, { label: string; labelAr: string }> =
 // other segments (Business / Government / Vendor) are display-only and their CTA
 // sends the user to the B2B portal to subscribe there.
 const B2B_PORTAL_URL = "https://qafila-b2b.bits3.com";
+const B2G_PORTAL_URL = "https://b2g.bits3.com";
+
+// Government plans link out to the B2G portal; all other external segments
+// (Business / Vendor) link to the B2B portal.
+const portalUrlForSegment = (segment: PlanSegment) =>
+  segment === "GOVERNMENT" ? B2G_PORTAL_URL : B2B_PORTAL_URL;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function featureLabel(key: string, locale: string): string {
@@ -346,7 +352,7 @@ function PlanCard({
           <div className="mt-6">
             {isExternal ? (
               <a
-                href={B2B_PORTAL_URL}
+                href={portalUrlForSegment(plan.segment)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`group/btn relative flex h-12 w-full items-center justify-center overflow-hidden rounded-2xl text-sm font-bold transition-all duration-300 ${
@@ -1184,7 +1190,7 @@ export default function PricingPage() {
                             <div className="mt-4">
                               {isExternal ? (
                                 <a
-                                  href={B2B_PORTAL_URL}
+                                  href={portalUrlForSegment(plan.segment)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className={`inline-flex items-center gap-1 rounded-lg px-4 py-1.5 text-[11px] font-bold transition-all ${
