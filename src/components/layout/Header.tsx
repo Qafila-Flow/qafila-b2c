@@ -134,8 +134,11 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
         )}
 
         {/* Top Bar - hidden on mobile */}
+        {/* z-40 keeps this bar's language dropdown — which opens downward into
+            the Middle Bar's region — above that bar's `z-30` layer, which would
+            otherwise intercept its clicks. */}
         <div
-          className={`relative z-10 hidden text-white md:block ${
+          className={`relative z-40 hidden text-white md:block ${
             isPremium ? "" : "bg-dark"
           }`}
         >
@@ -317,7 +320,7 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
                         <Crown
                           size={14}
                           aria-hidden="true"
-                          className="premium-crown absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 fill-amber-300 text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]"
+                          className="premium-crown pointer-events-none absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 fill-amber-300 text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]"
                         />
                       )}
                       <span
@@ -473,13 +476,13 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
             </button>
             {(
               [
+                { href: "/tags/saudi-made", label: "nav.tagSaudiMade" },
                 {
                   href: "/tags/limited-editions",
                   label: "nav.tagLimitedEditions",
                 },
                 { href: "/tags/luxuries", label: "nav.tagLuxuries" },
                 { href: "/tags/originals", label: "nav.tagOriginals" },
-                { href: "/tags/saudi-made", label: "nav.tagSaudiMade" },
               ] as const
             ).map(({ href, label }) => {
               const isActive = pathname === href;
