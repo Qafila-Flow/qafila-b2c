@@ -9,7 +9,7 @@ const SUGGESTION_CHIPS = [
   "Summary global trade",
   "Deep dive population growth",
   "List generative AI trends",
-  "Saudi fashion market size 2025",
+  "Saudi fashion market size 2026",
 ];
 
 interface ChatInputProps {

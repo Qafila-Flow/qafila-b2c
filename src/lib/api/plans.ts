@@ -1,6 +1,10 @@
 import apiClient from "./client";
 
-export type PlanSegment = "INDIVIDUAL" | "BUSINESS" | "GOVERNMENT";
+export type PlanSegment =
+  | "INDIVIDUAL"
+  | "BUSINESS"
+  | "GOVERNMENT"
+  | "VENDOR";
 
 export interface SubscriptionPlan {
   id: string;

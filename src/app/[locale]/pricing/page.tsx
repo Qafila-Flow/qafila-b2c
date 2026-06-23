@@ -36,7 +36,13 @@ const SEGMENT_CONFIG: Record<PlanSegment, { label: string; labelAr: string }> =
     INDIVIDUAL: { label: "Individual", labelAr: "أفراد" },
     BUSINESS: { label: "Business", labelAr: "أعمال" },
     GOVERNMENT: { label: "Government", labelAr: "حكومي" },
+    VENDOR: { label: "Vendor", labelAr: "بائع" },
   };
+
+// Only INDIVIDUAL plans can be subscribed to on the customer storefront. All
+// other segments (Business / Government / Vendor) are display-only and their CTA
+// sends the user to the B2B portal to subscribe there.
+const B2B_PORTAL_URL = "https://qafila-b2b.bits3.com";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function featureLabel(key: string, locale: string): string {
@@ -202,6 +208,8 @@ function PlanCard({
       ? plan.priceAnnually || 0
       : plan.priceMonthly || 0;
   const isFree = plan.priceMonthly === 0;
+  // Non-individual plans are display-only — their CTA links out to the B2B portal.
+  const isExternal = plan.segment !== "INDIVIDUAL";
   const highlights = planHighlights(plan, locale, 6);
 
   const monthly = plan.priceMonthly || 0;
@@ -219,6 +227,7 @@ function PlanCard({
     billedAnnually: locale === "ar" ? "تُحاسب سنوياً" : "billed annually",
     startFree: locale === "ar" ? "ابدأ مجاناً" : "Start for free",
     choosePlan: locale === "ar" ? "اختر هذه الخطة" : "Choose this plan",
+    goToPortal: locale === "ar" ? "بوابة الأعمال" : "Go to B2B portal",
     includes: locale === "ar" ? "ما تشمله الخطة" : "What's included",
     save: locale === "ar" ? "وفّر" : "Save",
   };
@@ -335,7 +344,32 @@ function PlanCard({
 
           {/* CTA */}
           <div className="mt-6">
-            {isCurrentPlan ? (
+            {isExternal ? (
+              <a
+                href={B2B_PORTAL_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`group/btn relative flex h-12 w-full items-center justify-center overflow-hidden rounded-2xl text-sm font-bold transition-all duration-300 ${
+                  isFeatured
+                    ? "bg-dark text-white shadow-lg shadow-dark/30 hover:shadow-xl hover:shadow-primary/30 dark:bg-white dark:text-dark"
+                    : "border border-gray-border bg-gray-light text-dark hover:border-primary hover:bg-primary hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-primary dark:hover:border-primary"
+                }`}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  {t.goToPortal}
+                  <ArrowRight
+                    size={15}
+                    className="transition-transform duration-300 group-hover/btn:translate-x-1 rtl:group-hover/btn:-translate-x-1 rtl:rotate-180"
+                  />
+                </span>
+                {isFeatured && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-primary/30 to-transparent transition-transform duration-700 group-hover/btn:translate-x-full"
+                  />
+                )}
+              </a>
+            ) : isCurrentPlan ? (
               <span className="flex h-12 w-full items-center justify-center rounded-2xl border-2 border-primary/40 bg-primary/5 text-sm font-bold text-primary dark:bg-primary/10">
                 <Check size={15} className="me-2" strokeWidth={2.5} />
                 {t.currentPlan}
@@ -462,9 +496,8 @@ export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">(
     "monthly",
   );
-  const [activeSegment, setActiveSegment] = useState<PlanSegment | "ALL">(
-    "ALL",
-  );
+  const [activeSegment, setActiveSegment] =
+    useState<PlanSegment>("INDIVIDUAL");
   const [subscribingPlan, setSubscribingPlan] =
     useState<SubscriptionPlan | null>(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -487,9 +520,9 @@ export default function PricingPage() {
 
   useEffect(() => {
     getPlans({ isActive: true, limit: 50 })
-      .then((res) =>
-        setPlans(res.data.filter((p) => p.segment !== "GOVERNMENT")),
-      )
+      // All segments are shown. INDIVIDUAL plans subscribe in-app; the others are
+      // display-only and redirect to the B2B portal (handled in PlanCard).
+      .then((res) => setPlans(res.data))
       .catch(() => setPlans([]))
       .finally(() => setLoading(false));
   }, []);
@@ -498,10 +531,7 @@ export default function PricingPage() {
     new Set(plans.map((p) => p.segment)),
   ) as PlanSegment[];
 
-  const filteredPlans =
-    activeSegment === "ALL"
-      ? plans
-      : plans.filter((p) => p.segment === activeSegment);
+  const filteredPlans = plans.filter((p) => p.segment === activeSegment);
   const sortedPlans = [...filteredPlans].sort(
     (a, b) => a.displayOrder - b.displayOrder,
   );
@@ -545,7 +575,6 @@ export default function PricingPage() {
       ? "للشركات والوكالات"
       : "For teams, businesses & agencies",
     forGovernment: isAr ? "للجهات الحكومية" : "For government entities",
-    all: isAr ? "كل الخطط" : "All plans",
     monthly: isAr ? "شهرياً" : "Monthly",
     annual: isAr ? "سنوياً" : "Annual",
     save2Months: isAr ? "خصم 17%" : "Save up to 17%",
@@ -587,6 +616,7 @@ export default function PricingPage() {
     perMo: isAr ? "/ شهر" : "/ mo",
     startFree: isAr ? "ابدأ مجاناً" : "Start free",
     selectPlan: isAr ? "اختر الخطة" : "Select plan",
+    goToPortal: isAr ? "بوابة الأعمال" : "B2B portal",
   };
 
   const faqs = isAr
@@ -932,12 +962,6 @@ export default function PricingPage() {
             {/* Segment pill switcher */}
             {availableSegments.length > 1 && (
               <div className="inline-flex items-center gap-1 rounded-full border border-gray-border bg-white/70 p-1 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/5">
-                <SegmentButton
-                  active={activeSegment === "ALL"}
-                  onClick={() => setActiveSegment("ALL")}
-                >
-                  {T.all}
-                </SegmentButton>
                 {availableSegments.map((seg) => (
                   <SegmentButton
                     key={seg}
@@ -1112,6 +1136,7 @@ export default function PricingPage() {
                         const isFree = plan.priceMonthly === 0;
                         const isCurrent = subscription?.planId === plan.id;
                         const isFeat = featuredPlan?.id === plan.id;
+                        const isExternal = plan.segment !== "INDIVIDUAL";
                         return (
                           <th
                             key={plan.id}
@@ -1157,7 +1182,24 @@ export default function PricingPage() {
                               )}
                             </div>
                             <div className="mt-4">
-                              {isCurrent ? (
+                              {isExternal ? (
+                                <a
+                                  href={B2B_PORTAL_URL}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`inline-flex items-center gap-1 rounded-lg px-4 py-1.5 text-[11px] font-bold transition-all ${
+                                    isFeat
+                                      ? "bg-dark text-white hover:bg-primary dark:bg-white dark:text-dark dark:hover:bg-primary dark:hover:text-white"
+                                      : "border border-gray-border text-dark hover:border-primary hover:text-primary dark:border-white/10 dark:text-gray-200 dark:hover:border-primary dark:hover:text-primary"
+                                  }`}
+                                >
+                                  {T.goToPortal}
+                                  <ArrowRight
+                                    size={11}
+                                    className="rtl:rotate-180"
+                                  />
+                                </a>
+                              ) : isCurrent ? (
                                 <span className="inline-flex items-center gap-1 rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-[11px] font-bold text-primary">
                                   <Check size={11} strokeWidth={3} />
                                   {T.current}
