@@ -31,11 +31,12 @@ const FEATURE_GROUPS: Record<string, { label: string; labelAr: string }> = {
   licenses: { label: "Licenses & Sharing", labelAr: "التراخيص والمشاركة" },
 };
 
-const SEGMENT_CONFIG: Record<PlanSegment, { label: string; labelAr: string }> = {
-  INDIVIDUAL: { label: "Individual", labelAr: "أفراد" },
-  BUSINESS: { label: "Business", labelAr: "أعمال" },
-  GOVERNMENT: { label: "Government", labelAr: "حكومي" },
-};
+const SEGMENT_CONFIG: Record<PlanSegment, { label: string; labelAr: string }> =
+  {
+    INDIVIDUAL: { label: "Individual", labelAr: "أفراد" },
+    BUSINESS: { label: "Business", labelAr: "أعمال" },
+    GOVERNMENT: { label: "Government", labelAr: "حكومي" },
+  };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function featureLabel(key: string, locale: string): string {
@@ -54,7 +55,7 @@ function featureLabel(key: string, locale: string): string {
     "Team Seats": "مقاعد الفريق",
     "Premium Support": "دعم متميز",
     "Saved Searches": "عمليات بحث محفوظة",
-    "Watchlist": "قائمة المراقبة",
+    Watchlist: "قائمة المراقبة",
     "Custom Reports": "تقارير مخصصة",
   };
   return dict[human] ?? human;
@@ -100,7 +101,9 @@ function planHighlights(
 // ── Cell renderer for the comparison table ───────────────────────────────────
 function CellValue({ value, locale }: { value: unknown; locale: string }) {
   if (value === null || value === undefined)
-    return <Minus size={14} className="mx-auto text-gray-300 dark:text-gray-700" />;
+    return (
+      <Minus size={14} className="mx-auto text-gray-300 dark:text-gray-700" />
+    );
 
   if (typeof value === "boolean") {
     return value ? (
@@ -114,7 +117,9 @@ function CellValue({ value, locale }: { value: unknown; locale: string }) {
 
   if (typeof value === "number") {
     if (value === 0)
-      return <Minus size={15} className="mx-auto text-gray-300 dark:text-gray-700" />;
+      return (
+        <Minus size={15} className="mx-auto text-gray-300 dark:text-gray-700" />
+      );
     if (value === -1)
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-green ring-1 ring-green/30">
@@ -131,7 +136,9 @@ function CellValue({ value, locale }: { value: unknown; locale: string }) {
 
   if (Array.isArray(value)) {
     if (value.length === 0)
-      return <Minus size={15} className="mx-auto text-gray-300 dark:text-gray-700" />;
+      return (
+        <Minus size={15} className="mx-auto text-gray-300 dark:text-gray-700" />
+      );
     return (
       <span className="text-xs text-dark dark:text-gray-200 leading-tight">
         {(value as string[]).join(" / ")}
@@ -140,7 +147,9 @@ function CellValue({ value, locale }: { value: unknown; locale: string }) {
   }
 
   return (
-    <span className="text-xs text-dark dark:text-gray-200">{String(value)}</span>
+    <span className="text-xs text-dark dark:text-gray-200">
+      {String(value)}
+    </span>
   );
 }
 
@@ -206,8 +215,8 @@ function PlanCard({
     mostPopular: locale === "ar" ? "الأكثر شيوعاً" : "Most Popular",
     currentPlan: locale === "ar" ? "خطتك الحالية" : "Current Plan",
     perMonth: locale === "ar" ? "/ شهرياً" : "/ month",
-    billedAnnually:
-      locale === "ar" ? "تُحاسب سنوياً" : "billed annually",
+    peryear: locale === "ar" ? "/ سنوياً" : "/ year",
+    billedAnnually: locale === "ar" ? "تُحاسب سنوياً" : "billed annually",
     startFree: locale === "ar" ? "ابدأ مجاناً" : "Start for free",
     choosePlan: locale === "ar" ? "اختر هذه الخطة" : "Choose this plan",
     includes: locale === "ar" ? "ما تشمله الخطة" : "What's included",
@@ -263,9 +272,11 @@ function PlanCard({
               </span>
             ) : (
               <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-text dark:text-gray-500">
-                {SEGMENT_CONFIG[plan.segment][
-                  locale === "ar" ? "labelAr" : "label"
-                ]}
+                {
+                  SEGMENT_CONFIG[plan.segment][
+                    locale === "ar" ? "labelAr" : "label"
+                  ]
+                }
               </span>
             )}
             <div className="flex items-center gap-1">
@@ -307,7 +318,7 @@ function PlanCard({
                     {price.toLocaleString()}
                   </span>
                   <span className="ms-1 text-sm font-medium text-gray-text dark:text-gray-400">
-                    {t.perMonth}
+                    {billingCycle === "monthly" ? t.perMonth : t.peryear}
                   </span>
                 </div>
                 {billingCycle === "annually" && yearlySavings > 0 && (
@@ -369,7 +380,9 @@ function PlanCard({
                   <li
                     key={label}
                     className="fade-rise flex items-start gap-3 text-sm text-dark dark:text-gray-200"
-                    style={{ animationDelay: `${300 + index * 110 + i * 60}ms` }}
+                    style={{
+                      animationDelay: `${300 + index * 110 + i * 60}ms`,
+                    }}
                   >
                     <span
                       className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
@@ -528,7 +541,9 @@ export default function PricingPage() {
       ? "من الإحصائيات المجانية إلى التغطية الكاملة للأسواق، اختر الخطة التي تناسب احتياجاتك البحثية."
       : "From free stats to full market coverage — pick the plan that fits how you research, scale and decide.",
     forIndividual: isAr ? "للأفراد والباحثين" : "For individuals & researchers",
-    forBusiness: isAr ? "للشركات والوكالات" : "For teams, businesses & agencies",
+    forBusiness: isAr
+      ? "للشركات والوكالات"
+      : "For teams, businesses & agencies",
     forGovernment: isAr ? "للجهات الحكومية" : "For government entities",
     all: isAr ? "كل الخطط" : "All plans",
     monthly: isAr ? "شهرياً" : "Monthly",
@@ -549,9 +564,7 @@ export default function PricingPage() {
     faqSub: isAr
       ? "كل ما تحتاج معرفته قبل البدء."
       : "Everything you need before you start.",
-    customCtaTitle: isAr
-      ? "تحتاج خطة مخصصة؟"
-      : "Need something custom?",
+    customCtaTitle: isAr ? "تحتاج خطة مخصصة؟" : "Need something custom?",
     customCtaSub: isAr
       ? "تواصل مع فريقنا للحصول على أسعار للمؤسسات، تراخيص جماعية، أو أي استفسار."
       : "Talk to our team about enterprise pricing, bulk licenses, or anything you'd like to ask.",
@@ -663,16 +676,22 @@ export default function PricingPage() {
             className="hero-arc-svg h-full w-full"
           >
             <defs>
-              <linearGradient id="arcGradMain" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stopColor="#7850c8" stopOpacity="0" />
-                <stop offset="22%"  stopColor="#7850c8" stopOpacity="0.65" />
-                <stop offset="50%"  stopColor="#e8983a" stopOpacity="1" />
-                <stop offset="78%"  stopColor="#e8983a" stopOpacity="0.65" />
+              <linearGradient
+                id="arcGradMain"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor="#7850c8" stopOpacity="0" />
+                <stop offset="22%" stopColor="#7850c8" stopOpacity="0.65" />
+                <stop offset="50%" stopColor="#e8983a" stopOpacity="1" />
+                <stop offset="78%" stopColor="#e8983a" stopOpacity="0.65" />
                 <stop offset="100%" stopColor="#7850c8" stopOpacity="0" />
               </linearGradient>
               <radialGradient id="arcCoreGrad" cx="50%" cy="50%" r="50%">
-                <stop offset="0%"   stopColor="#e8983a" stopOpacity="1" />
-                <stop offset="55%"  stopColor="#e8983a" stopOpacity="0.35" />
+                <stop offset="0%" stopColor="#e8983a" stopOpacity="1" />
+                <stop offset="55%" stopColor="#e8983a" stopOpacity="0.35" />
                 <stop offset="100%" stopColor="#e8983a" stopOpacity="0" />
               </radialGradient>
               <filter id="arcGlow" x="-50%" y="-50%" width="200%" height="200%">
@@ -684,7 +703,7 @@ export default function PricingPage() {
               </filter>
 
               <path id="arcOuter" d="M 60 760  A 560 560 0 0 1 1140 760" />
-              <path id="arcMain"  d="M 140 760 A 480 480 0 0 1 1060 760" />
+              <path id="arcMain" d="M 140 760 A 480 480 0 0 1 1060 760" />
               <path id="arcInner" d="M 220 760 A 400 400 0 0 1 980 760" />
             </defs>
 
@@ -788,22 +807,73 @@ export default function PricingPage() {
 
             {/* Origin core — radial glow that breathes */}
             <circle cx="600" cy="760" r="48" fill="url(#arcCoreGrad)">
-              <animate attributeName="r" values="38;66;38" dur="3.6s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.4;0.9;0.4" dur="3.6s" repeatCount="indefinite" />
+              <animate
+                attributeName="r"
+                values="38;66;38"
+                dur="3.6s"
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="opacity"
+                values="0.4;0.9;0.4"
+                dur="3.6s"
+                repeatCount="indefinite"
+              />
             </circle>
 
             {/* Expanding ping rings — radar-style outward ripples */}
-            <circle cx="600" cy="760" fill="none" stroke="#e8983a" strokeWidth="1.5">
-              <animate attributeName="r" values="18;140" dur="3s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.75;0" dur="3s" repeatCount="indefinite" />
+            <circle
+              cx="600"
+              cy="760"
+              fill="none"
+              stroke="#e8983a"
+              strokeWidth="1.5"
+            >
+              <animate
+                attributeName="r"
+                values="18;140"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="opacity"
+                values="0.75;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
             </circle>
-            <circle cx="600" cy="760" fill="none" stroke="#7850c8" strokeWidth="1">
-              <animate attributeName="r" values="18;120" dur="3s" begin="1.5s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="0.6;0" dur="3s" begin="1.5s" repeatCount="indefinite" />
+            <circle
+              cx="600"
+              cy="760"
+              fill="none"
+              stroke="#7850c8"
+              strokeWidth="1"
+            >
+              <animate
+                attributeName="r"
+                values="18;120"
+                dur="3s"
+                begin="1.5s"
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="opacity"
+                values="0.6;0"
+                dur="3s"
+                begin="1.5s"
+                repeatCount="indefinite"
+              />
             </circle>
 
             {/* Inner core dot */}
-            <circle cx="600" cy="760" r="6" fill="#ffffff" opacity="0.95" filter="url(#arcGlow)" />
+            <circle
+              cx="600"
+              cy="760"
+              r="6"
+              fill="#ffffff"
+              opacity="0.95"
+              filter="url(#arcGlow)"
+            />
             <circle cx="600" cy="760" r="3.5" fill="#e8983a" />
           </svg>
         </div>
@@ -827,7 +897,10 @@ export default function PricingPage() {
 
           {/* Title */}
           <h1 className="text-center text-4xl font-black leading-[1.05] tracking-tight text-dark dark:text-white sm:text-5xl lg:text-6xl">
-            <span className="fade-rise inline-block" style={{ animationDelay: "60ms" }}>
+            <span
+              className="fade-rise inline-block"
+              style={{ animationDelay: "60ms" }}
+            >
               {T.title1}
             </span>
             <br />
