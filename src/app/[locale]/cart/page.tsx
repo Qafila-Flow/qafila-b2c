@@ -28,12 +28,14 @@ export default function CartPage() {
         <Image
           src="/images/bag.png"
           alt=""
-          width={280}
-          height={224}
+          width={330}
+          height={250}
           className="mb-8"
           priority
         />
-        <h1 className="mb-3 text-2xl font-bold text-dark dark:text-gray-100">{t("cart.empty")}</h1>
+        <h1 className="mb-3 text-2xl font-bold text-dark dark:text-gray-100">
+          {t("cart.empty")}
+        </h1>
         <p className="mb-8 max-w-md text-center text-gray-text">
           {t("cart.emptyDescription")}
         </p>

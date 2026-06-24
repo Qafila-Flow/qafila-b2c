@@ -18,6 +18,7 @@ export interface VendorProfile {
   isVerified: boolean;
   isActive: boolean;
   isQafilaLab: boolean;
+  qafilaLabType?: "DESIGNER" | "MANUFACTURER" | null;
   followerCount: number;
   productCount: number;
   rating?: number | null;

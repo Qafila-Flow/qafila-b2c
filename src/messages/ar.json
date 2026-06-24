@@ -100,6 +100,8 @@
     "productsCount": "{count} منتجات",
     "vendorsCount": "{count} علامات في البرنامج",
     "followers": "{count} متابعاً",
+    "designer": "مصمّم علامة",
+    "manufacturer": "مصنّع علامة",
     "noVendors": "لا توجد علامات في قافلة لاب بعد. تحقق قريباً.",
     "noProducts": "لا توجد منتجات لهذه العلامة بعد.",
     "prev": "السابق",

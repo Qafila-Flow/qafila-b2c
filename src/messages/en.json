@@ -100,6 +100,8 @@
     "productsCount": "{count} products",
     "vendorsCount": "{count} brands in the program",
     "followers": "{count} followers",
+    "designer": "Brand Designer",
+    "manufacturer": "Brand Manufacturer",
     "noVendors": "No Qafila Lab brands yet. Check back soon.",
     "noProducts": "This brand has no products listed yet.",
     "prev": "Previous",

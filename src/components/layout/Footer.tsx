@@ -370,7 +370,12 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <a
+                  href="/vat-info.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white"
+                >
                   {t("legalLinks.ksaVat")}
                 </a>
               </li>

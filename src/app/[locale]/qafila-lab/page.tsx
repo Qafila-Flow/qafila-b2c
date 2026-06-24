@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getQafilaLabVendors, type VendorProfile } from "@/lib/api/vendors";
 import { getMediaUrl } from "@/lib/utils";
+import LabTypeTag from "@/components/qafila-lab/LabTypeTag";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -134,6 +135,19 @@ export default async function QafilaLabIndexPage({
                         </h3>
                         <Sparkles className="h-3.5 w-3.5 shrink-0 text-amber-500" />
                       </div>
+                      {vendor.qafilaLabType && (
+                        <div className="mt-2">
+                          <LabTypeTag
+                            type={vendor.qafilaLabType}
+                            label={
+                              vendor.qafilaLabType === "DESIGNER"
+                                ? t("designer")
+                                : t("manufacturer")
+                            }
+                            variant="light"
+                          />
+                        </div>
+                      )}
                       {description && (
                         <p className="mt-1 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
                           {description}
