@@ -85,9 +85,11 @@ export default function ProductCard({
     >
       {/* Image */}
       <div className="relative mb-2.5 min-h-80 overflow-hidden rounded-t-lg bg-gray-100 dark:bg-dark">
-        {/* Top-start: sale badge takes priority, otherwise the highest-priority tag */}
+        {/* Top-left: sale badge takes priority, otherwise the highest-priority tag.
+            Uses physical `left` (not logical `start`) so it always shares the
+            left corner with the Saudi-Made seal, even in RTL. */}
         {product.badge ? (
-          <span className="absolute start-2.5 top-2.5 z-10 rounded bg-discount px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+          <span className="absolute left-2.5 top-2.5 z-10 rounded bg-discount px-2 py-0.5 text-[10px] font-bold uppercase text-white">
             {product.badge}
           </span>
         ) : showPrimaryPill && primaryTag ? (
@@ -96,7 +98,7 @@ export default function ProductCard({
             const Icon = style.icon;
             return (
               <span
-                className={`absolute start-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${style.pill}`}
+                className={`absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${style.pill}`}
               >
                 <Icon size={10} strokeWidth={2.5} />
                 {tt(style.key)}
@@ -105,8 +107,10 @@ export default function ProductCard({
           })()
         ) : null}
 
-        {/* Saudi-Made seal — image badge in the top-start corner. Stacks below
-            a sale badge when one is present so the two never overlap.
+        {/* Saudi-Made seal — image badge always pinned to the top-LEFT corner.
+            Uses physical `left` (not logical `start`) so it stays on the left
+            in RTL too. Stacks below a sale badge when one is present so the two
+            never overlap.
             Plain <img>: the SVG lives in /public and would 404 through the
             next/image optimizer (dangerouslyAllowSVG is off). */}
         {hasSaudiMade && (
@@ -116,17 +120,18 @@ export default function ProductCard({
             alt={tt("saudiMade")}
             width={46}
             height={31}
-            className={`absolute start-0 z-10 h-auto w-11 drop-shadow-md ${
+            className={`absolute left-0 z-10 h-auto w-11 drop-shadow-md ${
               product.badge ? "top-9" : "top-2.5"
             }`}
           />
         )}
 
-        {/* Top-end: wishlist only — kept clean and isolated */}
+        {/* Top-right: wishlist only — kept clean and isolated. Uses physical
+            `right` (not logical `end`) so it stays on the right in RTL too. */}
         <button
           aria-label="Add to wishlist"
           onClick={handleWishlistClick}
-          className="absolute end-2.5 top-2.5 z-10 grid h-7 w-7 place-items-center rounded-full bg-white/90 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition-colors hover:bg-white dark:bg-dark/80 dark:ring-white/10 dark:hover:bg-dark"
+          className="absolute right-2.5 top-2.5 z-10 grid h-7 w-7 place-items-center rounded-full bg-white/90 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition-colors hover:bg-white dark:bg-dark/80 dark:ring-white/10 dark:hover:bg-dark"
         >
           <Heart
             size={15}
