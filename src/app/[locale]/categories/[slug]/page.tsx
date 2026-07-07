@@ -114,26 +114,36 @@ export default async function CategoryPage({
     productsRes,
   ] = await Promise.all([
     getCategoryBreadcrumb(category.id).catch(() => []),
-    getBrands({ isActive: true, limit: 100 }).catch(() => ({
-      data: [],
-      meta: { total: 0, page: 1, limit: 100, totalPages: 0 },
-    })),
+    getBrands({ isActive: true, limit: 100, categoryId: category.id }).catch(
+      () => ({
+        data: [],
+        meta: { total: 0, page: 1, limit: 100, totalPages: 0 },
+      }),
+    ),
     getColors({ isActive: true, limit: 100 }).catch(() => ({
       data: [],
       meta: { total: 0, page: 1, limit: 100, totalPages: 0 },
     })),
-    getSizes({ isActive: true, limit: 100 }).catch(() => ({
+    getSizes({ isActive: true, limit: 100, categoryId: category.id }).catch(
+      () => ({
+        data: [],
+        meta: { total: 0, page: 1, limit: 100, totalPages: 0 },
+      }),
+    ),
+    getMaterials({
+      isActive: true,
+      limit: 100,
+      categoryId: category.id,
+    }).catch(() => ({
       data: [],
       meta: { total: 0, page: 1, limit: 100, totalPages: 0 },
     })),
-    getMaterials({ isActive: true, limit: 100 }).catch(() => ({
-      data: [],
-      meta: { total: 0, page: 1, limit: 100, totalPages: 0 },
-    })),
-    getPatterns({ isActive: true, limit: 100 }).catch(() => ({
-      data: [],
-      meta: { total: 0, page: 1, limit: 100, totalPages: 0 },
-    })),
+    getPatterns({ isActive: true, limit: 100, categoryId: category.id }).catch(
+      () => ({
+        data: [],
+        meta: { total: 0, page: 1, limit: 100, totalPages: 0 },
+      }),
+    ),
     getPriceRanges({ isActive: true, limit: 100 }).catch(() => ({
       data: [],
       meta: { total: 0, page: 1, limit: 100, totalPages: 0 },

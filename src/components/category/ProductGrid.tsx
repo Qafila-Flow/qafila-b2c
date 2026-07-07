@@ -16,9 +16,11 @@ export default function ProductGrid({ products, isPending }: ProductGridProps) {
   if (products.length === 0 && !isPending) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <PackageSearch size={48} className="mb-4 text-gray-border" />
-        <h3 className="text-base font-semibold text-dark">{t("noResults")}</h3>
-        <p className="mt-1 text-xs text-gray-text">
+        <PackageSearch size={48} className="mb-4 text-gray-400 dark:text-gray-500" />
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+          {t("noResults")}
+        </h3>
+        <p className="mt-1 text-xs text-gray-600 dark:text-gray-300">
           {t("noResultsDescription")}
         </p>
       </div>

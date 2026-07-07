@@ -7,6 +7,8 @@ export interface GetBrandsParams {
   search?: string;
   page?: number;
   limit?: number;
+  // Restrict to brands scoped to this category (plus global brands)
+  categoryId?: string;
 }
 
 export async function getBrands(

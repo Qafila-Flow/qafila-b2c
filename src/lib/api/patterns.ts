@@ -7,6 +7,8 @@ export interface GetPatternsParams {
   search?: string;
   page?: number;
   limit?: number;
+  // Restrict to patterns scoped to this category (plus global patterns)
+  categoryId?: string;
 }
 
 export async function getPatterns(

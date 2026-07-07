@@ -7,6 +7,8 @@ export interface GetMaterialsParams {
   search?: string;
   page?: number;
   limit?: number;
+  // Restrict to materials scoped to this category (plus global materials)
+  categoryId?: string;
 }
 
 export async function getMaterials(

@@ -7,6 +7,8 @@ export interface GetSizesParams {
   search?: string;
   page?: number;
   limit?: number;
+  // Restrict to sizes scoped to this category (plus global sizes)
+  categoryId?: string;
 }
 
 export async function getSizes(

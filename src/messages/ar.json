@@ -9,10 +9,10 @@
   },
   "nav": {
     "categories": "الفئات",
-    "tagLimitedEditions": "إصدارات محدودة",
-    "tagLuxuries": "كماليات",
-    "tagOriginals": "أصلية",
-    "tagSaudiMade": "صنع في السعودية",
+    "tagLimitedEditions": "حصريات",
+    "tagLuxuries": "منتجات فاخرة",
+    "tagOriginals": "منتجات أصلية",
+    "tagSaudiMade": "صناعة سعودية",
     "priceAccess": "السعر والوصول",
     "researchAI": "بحث AI",
     "menu": "القائمة"
@@ -39,7 +39,7 @@
       "ابحث عن \"ساعات\"",
       "ابحث عن \"عطور\"",
       "ابحث عن \"عبايات\"",
-      "ابحث عن \"هواتف ذكية\"",
+      "ابحث عن \"نظارات شمسية\"",
       "ابحث عن \"أحذية رياضية\"",
       "ابحث عن \"العناية بالبشرة\""
     ],
@@ -87,7 +87,7 @@
     "shopNow": "تسوق الآن"
   },
   "saudiMade": {
-    "title": "صنع سعودي",
+    "title": "صناعة سعودية",
     "discount": "خصم 20 - 70%",
     "shopNow": "تسوق الآن"
   },
@@ -120,8 +120,8 @@
     "reviews": "(192)"
   },
   "productTag": {
-    "limitedEditions": "إصدار محدود",
-    "luxuries": "كماليات",
+    "limitedEditions": "حصري",
+    "luxuries": "منتجات فاخرة",
     "originals": "أصلي",
     "saudiMade": "صنع في السعودية"
   },

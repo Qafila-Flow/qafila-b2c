@@ -15,19 +15,21 @@ export interface ProductTagStyle {
 }
 
 export const TAG_STYLES: Record<PillTag, ProductTagStyle> = {
+  // Cohesive warm palette anchored on the brand amber (--color-primary #e8983a):
+  // amber hero / black-and-gold luxury / warm stone — one system, three tones.
   LIMITED_EDITIONS: {
     icon: Crown,
-    pill: "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md shadow-amber-900/30 ring-1 ring-white/20",
+    pill: "bg-gradient-to-r from-[#e8983a] to-[#c96a25] text-white shadow-md shadow-amber-900/30 ring-1 ring-white/20",
     key: "limitedEditions",
   },
   LUXURIES: {
     icon: Gem,
-    pill: "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-900/30 ring-1 ring-white/20",
+    pill: "bg-gradient-to-r from-neutral-900 to-neutral-800 text-white shadow-md shadow-black/30 ring-1 ring-amber-400/30",
     key: "luxuries",
   },
   ORIGINALS: {
     icon: Award,
-    pill: "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-900/30 ring-1 ring-white/20",
+    pill: "bg-gradient-to-r from-stone-600 to-stone-700 text-white shadow-md shadow-stone-900/30 ring-1 ring-white/15",
     key: "originals",
   },
 };

@@ -141,7 +141,8 @@ export default function SearchBox({
     try {
       const raw = localStorage.getItem(RECENT_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed)) setRecent(parsed.filter((x) => typeof x === "string"));
+      if (Array.isArray(parsed))
+        setRecent(parsed.filter((x) => typeof x === "string"));
     } catch {
       /* ignore malformed storage */
     }
@@ -155,10 +156,10 @@ export default function SearchBox({
     const value = term.trim();
     if (!value) return;
     setRecent((prev) => {
-      const next = [value, ...prev.filter((x) => x.toLowerCase() !== value.toLowerCase())].slice(
-        0,
-        MAX_RECENT,
-      );
+      const next = [
+        value,
+        ...prev.filter((x) => x.toLowerCase() !== value.toLowerCase()),
+      ].slice(0, MAX_RECENT);
       try {
         localStorage.setItem(RECENT_KEY, JSON.stringify(next));
       } catch {
@@ -200,7 +201,10 @@ export default function SearchBox({
     setLoading(true);
     const timer = window.setTimeout(async () => {
       try {
-        const res = await getProducts({ search: trimmed, limit: SUGGEST_LIMIT });
+        const res = await getProducts({
+          search: trimmed,
+          limit: SUGGEST_LIMIT,
+        });
         if (token !== reqToken.current) return; // a newer request superseded this one
         setResults(res.data.map((item) => mapSuggestion(item, locale)));
       } catch {
@@ -221,7 +225,10 @@ export default function SearchBox({
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     };
@@ -331,8 +338,7 @@ export default function SearchBox({
 
   const showPanel = open;
   const optionId = (i: number) => `${listboxId}-opt-${i}`;
-  const activeDescendant =
-    activeIndex >= 0 ? optionId(activeIndex) : undefined;
+  const activeDescendant = activeIndex >= 0 ? optionId(activeIndex) : undefined;
 
   // ---- Panel content ----
   const panel = (
@@ -368,7 +374,10 @@ export default function SearchBox({
                 {t("searchFor")}{" "}
                 <span className="font-semibold">&ldquo;{trimmed}&rdquo;</span>
               </span>
-              <CornerDownLeft size={14} className="shrink-0 text-gray-300 dark:text-gray-600" />
+              <CornerDownLeft
+                size={14}
+                className="shrink-0 text-gray-300 dark:text-gray-600"
+              />
             </button>
 
             {/* Live product results */}
@@ -429,7 +438,10 @@ export default function SearchBox({
                           <Highlight text={p.sub} query={trimmed} />
                         </span>
                       </span>
-                      <span className="shrink-0 text-xs font-bold text-dark dark:text-gray-100" dir="ltr">
+                      <span
+                        className="shrink-0 text-xs font-bold text-dark dark:text-gray-100"
+                        dir="ltr"
+                      >
                         <SarIcon /> {p.price.toFixed(1)}
                       </span>
                     </button>
@@ -454,7 +466,9 @@ export default function SearchBox({
                   <p className="text-sm font-medium text-dark dark:text-gray-100">
                     {t("noResults", { query: trimmed })}
                   </p>
-                  <p className="mt-1 text-xs text-gray-text">{t("noResultsHint")}</p>
+                  <p className="mt-1 text-xs text-gray-text">
+                    {t("noResultsHint")}
+                  </p>
                 </div>
               )
             )}
@@ -602,13 +616,12 @@ export default function SearchBox({
               <X size={14} />
             )}
           </button>
-        ) : (
-          shortcut && (
-            <kbd className="pointer-events-none absolute end-3 top-1/2 hidden -translate-y-1/2 select-none rounded border border-gray-border px-1.5 py-0.5 text-[10px] font-medium text-gray-text dark:border-gray-700 md:block">
-              {shortcut}
-            </kbd>
-          )
-        )}
+        ) : // shortcut && (
+        //   <kbd className="pointer-events-none absolute end-3 top-1/2 hidden -translate-y-1/2 select-none rounded border border-gray-border px-1.5 py-0.5 text-[10px] font-medium text-gray-text dark:border-gray-700 md:block">
+        //     {shortcut}
+        //   </kbd>
+        // )
+        null}
       </div>
 
       {showPanel && panel}
