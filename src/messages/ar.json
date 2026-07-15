@@ -11,7 +11,6 @@
     "categories": "الفئات",
     "tagLimitedEditions": "حصريات",
     "tagLuxuries": "منتجات فاخرة",
-    "tagOriginals": "منتجات أصلية",
     "tagSaudiMade": "صناعة سعودية",
     "priceAccess": "السعر والوصول",
     "researchAI": "بحث AI",
@@ -100,8 +99,8 @@
     "productsCount": "{count} منتجات",
     "vendorsCount": "{count} علامات في البرنامج",
     "followers": "{count} متابعاً",
-    "designer": "مصمّم علامة",
-    "manufacturer": "مصنّع علامة",
+    "designer": "مصمّم براندات",
+    "manufacturer": "مُصَّنِع براندات",
     "noVendors": "لا توجد علامات في قافلة لاب بعد. تحقق قريباً.",
     "noProducts": "لا توجد منتجات لهذه العلامة بعد.",
     "prev": "السابق",
@@ -122,7 +121,6 @@
   "productTag": {
     "limitedEditions": "حصري",
     "luxuries": "منتجات فاخرة",
-    "originals": "أصلي",
     "saudiMade": "صنع في السعودية"
   },
   "productTagPage": {

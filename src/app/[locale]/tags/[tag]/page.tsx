@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { PackageSearch, Crown, Gem, Award, BadgeCheck } from "lucide-react";
+import { PackageSearch, Crown, Gem, BadgeCheck } from "lucide-react";
 import { getProducts } from "@/lib/api/products";
 import type { ApiProduct, ProductTag } from "@/lib/api/products";
 import { getMediaUrl } from "@/lib/utils";
@@ -10,7 +10,6 @@ import { Link } from "@/i18n/navigation";
 const SLUG_TO_TAG: Record<string, ProductTag> = {
   "limited-editions": "LIMITED_EDITIONS",
   luxuries: "LUXURIES",
-  originals: "ORIGINALS",
   "saudi-made": "SAUDI_MADE",
 };
 
@@ -20,7 +19,7 @@ const TAG_THEME: Record<
     icon: typeof Crown;
     gradient: string;
     glow: string;
-    titleKey: "limitedEditions" | "luxuries" | "originals" | "saudiMade";
+    titleKey: "limitedEditions" | "luxuries" | "saudiMade";
     /** Hero banner image. Drop the real asset at this path in
      * `public/images/`; until then the `bannerGradient` shows through. */
     banner: string;
@@ -44,14 +43,6 @@ const TAG_THEME: Record<
     titleKey: "luxuries",
     banner: "/images/luxuries-bg.jpeg",
     bannerGradient: "from-neutral-900 via-neutral-800 to-neutral-700",
-  },
-  ORIGINALS: {
-    icon: Award,
-    gradient: "from-emerald-600 to-teal-600",
-    glow: "shadow-emerald-500/30",
-    titleKey: "originals",
-    banner: "/images/originals-bg.jpeg",
-    bannerGradient: "from-stone-600 via-stone-600 to-stone-700",
   },
   SAUDI_MADE: {
     icon: BadgeCheck,

@@ -1,4 +1,4 @@
-import { Crown, Gem, Award } from "lucide-react";
+import { Crown, Gem } from "lucide-react";
 import type { ProductTag } from "@/lib/api/products";
 
 /** Marketing tags that render as a text pill (icon + label). SAUDI_MADE is
@@ -11,7 +11,7 @@ export interface ProductTagStyle {
   /** Solid gradient pill — readable on any photo background */
   pill: string;
   /** i18n key under `productTag.<key>` */
-  key: "limitedEditions" | "luxuries" | "originals";
+  key: "limitedEditions" | "luxuries";
 }
 
 export const TAG_STYLES: Record<PillTag, ProductTagStyle> = {
@@ -27,20 +27,11 @@ export const TAG_STYLES: Record<PillTag, ProductTagStyle> = {
     pill: "bg-gradient-to-r from-neutral-900 to-neutral-800 text-white shadow-md shadow-black/30 ring-1 ring-amber-400/30",
     key: "luxuries",
   },
-  ORIGINALS: {
-    icon: Award,
-    pill: "bg-gradient-to-r from-stone-600 to-stone-700 text-white shadow-md shadow-stone-900/30 ring-1 ring-white/15",
-    key: "originals",
-  },
 };
 
 /** Display priority — highest first. The top-priority tag claims the
  * prominent slot in compact layouts (e.g. the product card overlay). */
-export const TAG_PRIORITY: PillTag[] = [
-  "LIMITED_EDITIONS",
-  "LUXURIES",
-  "ORIGINALS",
-];
+export const TAG_PRIORITY: PillTag[] = ["LIMITED_EDITIONS", "LUXURIES"];
 
 /** Public path to the "Saudi Made" seal asset. Rendered as an image badge
  * (not a text pill) so the made-in seal reads as a distinct mark. */

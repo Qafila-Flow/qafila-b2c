@@ -5,8 +5,8 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  // Serialize array params as comma-joined values (e.g. ?tags=ORIGINALS,LUXURIES)
-  // instead of Axios's default bracket form (?tags[]=ORIGINALS). The backend's
+  // Serialize array params as comma-joined values (e.g. ?tags=LIMITED_EDITIONS,LUXURIES)
+  // instead of Axios's default bracket form (?tags[]=LUXURIES). The backend's
   // whitelist validation only recognizes the bracket-less `key`, so the bracketed
   // form is stripped and the filter is silently ignored — making every tag/color/
   // size filter return ALL products. The API splits these comma lists server-side.

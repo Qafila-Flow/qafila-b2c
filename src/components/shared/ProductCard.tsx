@@ -49,7 +49,7 @@ export default function ProductCard({
   // When present it stacks below any sale badge and suppresses the marketing
   // text-pill there, so the two never overlap.
   const hasSaudiMade = tags.includes("SAUDI_MADE");
-  // Priority: Limited > Luxuries > Originals — the highest-priority tag claims
+  // Priority: Limited > Luxuries — the highest-priority tag claims
   // the prominent top-start slot (when neither a sale badge nor the Saudi-Made
   // seal is competing for it). Any remaining tags render as a uniform pill row
   // along the bottom edge, which keeps contrast consistent across photos.

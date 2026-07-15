@@ -11,7 +11,6 @@
     "categories": "Categories",
     "tagLimitedEditions": "Limited Editions",
     "tagLuxuries": "Luxuries",
-    "tagOriginals": "Originals",
     "tagSaudiMade": "Saudi Made",
     "priceAccess": "Price & Access",
     "researchAI": "Research AI",
@@ -122,7 +121,6 @@
   "productTag": {
     "limitedEditions": "Limited Edition",
     "luxuries": "Luxury",
-    "originals": "Original",
     "saudiMade": "Saudi Made"
   },
   "productTagPage": {

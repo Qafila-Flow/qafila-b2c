@@ -6,6 +6,10 @@ import Carousel from "@/components/shared/Carousel";
 import { useActiveCategory } from "@/lib/active-category-context";
 import { getMediaUrl } from "@/lib/utils";
 
+// Roots whose direct children are wrapper categories (e.g. saudi-brands →
+// saudi-brands-1): show the wrapper's own subcategories instead of the wrapper.
+const FLATTENED_ROOT_SLUGS = ["saudi-brands"];
+
 export default function CategoryCarousel() {
   const locale = useLocale();
   const { activeRootSlug, categoryTree } = useActiveCategory();
@@ -14,7 +18,11 @@ export default function CategoryCarousel() {
     (c) => c.parentId === null && c.slug === activeRootSlug,
   );
 
-  const subcategories = activeRoot?.children ?? [];
+  const children = activeRoot?.children ?? [];
+
+  const subcategories = FLATTENED_ROOT_SLUGS.includes(activeRootSlug)
+    ? children.flatMap((c) => (c.children?.length ? c.children : [c]))
+    : children;
 
   if (subcategories.length === 0) return null;
 
