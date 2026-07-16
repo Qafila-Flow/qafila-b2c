@@ -80,7 +80,21 @@ export async function streamChat(
   });
 
   if (!response.ok) {
-    callbacks.onError(`Request failed: ${response.status} ${response.statusText}`);
+    let message = `Request failed: ${response.status} ${response.statusText}`;
+    try {
+      const body = await response.json();
+      // NestJS errors: { message: string | string[] } — plan-limit errors
+      // carry the human-readable reason (e.g. daily query limit reached).
+      const bodyMessage = Array.isArray(body?.message)
+        ? body.message.join(', ')
+        : body?.message;
+      if (typeof bodyMessage === 'string' && bodyMessage) {
+        message = bodyMessage;
+      }
+    } catch {
+      // Non-JSON body — keep the generic status message
+    }
+    callbacks.onError(message);
     return;
   }
 
