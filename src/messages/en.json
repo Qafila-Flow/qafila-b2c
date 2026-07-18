@@ -594,6 +594,17 @@
     "subtitle": "Find answers to common questions",
     "error": "Failed to load FAQs. Please try again later."
   },
+  "about": {
+    "title": "About Qafila",
+    "error": "Failed to load this page. Please try again later.",
+    "mission": "Our Mission",
+    "vision": "Our Vision",
+    "contact": "Contact Us",
+    "followUs": "Follow Us",
+    "social": {
+      "website": "Website"
+    }
+  },
   "vendor": {
     "allProducts": "All Products",
     "specialOffers": "Special Offers",

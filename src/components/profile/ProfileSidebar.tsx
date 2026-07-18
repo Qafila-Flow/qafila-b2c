@@ -156,7 +156,7 @@ export default function ProfileSidebar() {
           label={t("sidebar.faqs")}
         />
         <SidebarLink
-          href="/profile"
+          href="/profile/about"
           icon={<QafilaIcon size={20} />}
           label={t("sidebar.aboutQafila")}
         />
