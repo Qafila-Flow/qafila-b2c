@@ -29,9 +29,11 @@ body {
 
 /* The serif stack (ui-serif/Georgia/Times) carries no Arabic glyphs, so RTL
    headings fall through to whatever Arabic serif the OS happens to ship.
-   Pin them to Plex instead. */
+   Pin them to Plex instead.
+   NOTE: reference --font-plex-sans (the next/font variable), NOT the --font-plex
+   theme key — @theme inline never emits its keys as CSS variables. */
 [dir="rtl"] .font-serif {
-  font-family: var(--font-plex);
+  font-family: var(--font-plex-sans), "IBM Plex Sans Arabic", Tahoma, sans-serif;
 }
 
 /* Arabic script has no italic form. Browsers fake it by shearing the glyphs,
