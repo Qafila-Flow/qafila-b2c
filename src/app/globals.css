@@ -13,7 +13,7 @@
   --color-star: #f5a623;
   --color-discount: #e53935;
   --color-green: #4caf50;
-  --font-cairo: var(--font-cairo), sans-serif;
+  --font-plex: var(--font-plex-sans), sans-serif;
 }
 
 /* * {

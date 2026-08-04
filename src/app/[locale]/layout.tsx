@@ -3,13 +3,14 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { Cairo } from "next/font/google";
+import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "../globals.css";
 
-const cairo = Cairo({
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-cairo",
+  variable: "--font-plex-sans",
 });
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -61,7 +62,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       dir={dir}
-      className={cairo.variable}
+      className={ibmPlexSansArabic.variable}
       suppressHydrationWarning
     >
       {/* Prevent flash of wrong theme */}
@@ -72,7 +73,7 @@ export default async function LocaleLayout({
           }}
         />
       </head>
-      <body className="font-cairo antialiased">
+      <body className="font-plex antialiased">
         <NextIntlClientProvider>
           <ThemeProvider>
             <AuthProvider>
