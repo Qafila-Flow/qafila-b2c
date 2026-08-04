@@ -309,7 +309,7 @@ function PlanCard({
           </div>
 
           {/* Plan name */}
-          <h3 className="mt-5 text-2xl font-extrabold tracking-tight text-dark dark:text-white">
+          <h3 className="mt-5 text-2xl font-bold tracking-tight text-dark dark:text-white">
             {planName}
           </h3>
 
@@ -321,7 +321,7 @@ function PlanCard({
           >
             {isFree ? (
               <div className="flex items-baseline gap-1.5" dir="ltr">
-                <span className="text-5xl font-black tracking-tight text-dark dark:text-white">
+                <span className="text-5xl font-bold tracking-tight text-dark dark:text-white">
                   Free
                 </span>
               </div>
@@ -329,7 +329,7 @@ function PlanCard({
               <>
                 <div className="flex items-baseline gap-1" dir="ltr">
                   <SarIcon className="text-2xl text-dark dark:text-white" />
-                  <span className="text-5xl font-black tracking-tight text-dark dark:text-white">
+                  <span className="text-5xl font-bold tracking-tight text-dark dark:text-white">
                     {price.toLocaleString()}
                   </span>
                   <span className="ms-1 text-sm font-medium text-gray-text dark:text-gray-400">
@@ -932,7 +932,7 @@ export default function PricingPage() {
           </div>
 
           {/* Title */}
-          <h1 className="text-center text-4xl font-black leading-[1.05] tracking-tight text-dark dark:text-white sm:text-5xl lg:text-6xl">
+          <h1 className="text-center text-4xl font-bold leading-[1.05] tracking-tight text-dark dark:text-white sm:text-5xl lg:text-6xl">
             <span
               className="fade-rise inline-block"
               style={{ animationDelay: "60ms" }}
@@ -1010,7 +1010,7 @@ export default function PricingPage() {
               >
                 {T.annual}
                 <span
-                  className={`rounded-full px-1.5 py-0.5 text-[9px] font-extrabold transition-colors ${
+                  className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold transition-colors ${
                     billingCycle === "annually"
                       ? "bg-green text-white"
                       : "bg-green/10 text-green"
@@ -1118,7 +1118,7 @@ export default function PricingPage() {
         >
           <div className="mx-auto max-w-6xl px-6">
             <div className="text-center">
-              <h2 className="text-3xl font-black tracking-tight text-dark dark:text-white sm:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tight text-dark dark:text-white sm:text-4xl">
                 {T.compareTitle}
               </h2>
               <p className="mt-3 text-base text-gray-text dark:text-gray-400">
@@ -1159,7 +1159,7 @@ export default function PricingPage() {
                               </span>
                             )}
                             <div
-                              className={`text-base font-extrabold ${
+                              className={`text-base font-bold ${
                                 isCurrent
                                   ? "text-primary"
                                   : "text-dark dark:text-white"
@@ -1172,13 +1172,13 @@ export default function PricingPage() {
                               dir="ltr"
                             >
                               {isFree ? (
-                                <span className="text-2xl font-black text-dark dark:text-white">
+                                <span className="text-2xl font-bold text-dark dark:text-white">
                                   {T.free}
                                 </span>
                               ) : (
                                 <>
                                   <SarIcon className="text-base text-dark dark:text-white" />
-                                  <span className="text-2xl font-black text-dark dark:text-white">
+                                  <span className="text-2xl font-bold text-dark dark:text-white">
                                     {price?.toLocaleString()}
                                   </span>
                                   <span className="ms-0.5 text-[11px] text-gray-text dark:text-gray-500">
@@ -1258,7 +1258,7 @@ export default function PricingPage() {
                               }
                               className="flex w-full items-center justify-between gap-3 px-6 py-3.5 text-start"
                             >
-                              <span className="flex items-center gap-2 text-sm font-extrabold text-dark dark:text-white">
+                              <span className="flex items-center gap-2 text-sm font-bold text-dark dark:text-white">
                                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                                 {isAr ? groupCfg.labelAr : groupCfg.label}
                               </span>
@@ -1323,7 +1323,7 @@ export default function PricingPage() {
       <section className="bg-white py-20 dark:bg-[#0F0F12]">
         <div className="mx-auto max-w-3xl px-6">
           <div className="text-center">
-            <h2 className="text-3xl font-black tracking-tight text-dark dark:text-white sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-dark dark:text-white sm:text-4xl">
               {T.faqHeading}
             </h2>
             <p className="mt-3 text-base text-gray-text dark:text-gray-400">
@@ -1366,7 +1366,7 @@ export default function PricingPage() {
 
               <div className="relative grid items-center gap-10 lg:grid-cols-[1fr_auto]">
                 <div>
-                  <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+                  <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                     {T.customCtaTitle}
                   </h2>
                   <p className="mt-3 max-w-lg text-base leading-relaxed text-white/70">

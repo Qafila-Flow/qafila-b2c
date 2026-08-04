@@ -300,7 +300,7 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
               {/* Gold Member badge */}
               {isPremium && (
                 <>
-                  <span className="premium-pill hidden items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-extrabold tracking-wide text-amber-950 lg:flex">
+                  <span className="premium-pill hidden items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold tracking-wide text-amber-950 lg:flex">
                     <Crown size={13} className="fill-amber-950/90" />
                     <span className="max-w-28 truncate">{planName}</span>
                   </span>
@@ -553,7 +553,7 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
               {t("nav.menu")}
             </h2>
             {isPremium && (
-              <span className="premium-pill flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold text-amber-950">
+              <span className="premium-pill flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-amber-950">
                 <Crown size={10} className="fill-amber-950/90" />
                 <span className="max-w-24 truncate">{planName}</span>
               </span>

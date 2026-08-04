@@ -27,6 +27,19 @@ body {
   color: #1a1a1a;
 }
 
+/* The serif stack (ui-serif/Georgia/Times) carries no Arabic glyphs, so RTL
+   headings fall through to whatever Arabic serif the OS happens to ship.
+   Pin them to Plex instead. */
+[dir="rtl"] .font-serif {
+  font-family: var(--font-plex);
+}
+
+/* Arabic script has no italic form. Browsers fake it by shearing the glyphs,
+   which distorts letterforms and breaks the joins between them. */
+[dir="rtl"] .italic {
+  font-style: normal;
+}
+
 /* Dark mode base */
 .dark body {
   background-color: #0f0f0f;

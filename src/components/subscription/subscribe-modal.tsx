@@ -205,11 +205,11 @@ export function SubscribeModal({
                   </div>
                   <div className="text-right" dir="ltr">
                     {isFree ? (
-                      <span className="text-lg font-extrabold text-dark dark:text-gray-100">
+                      <span className="text-lg font-bold text-dark dark:text-gray-100">
                         Free
                       </span>
                     ) : (
-                      <span className="text-lg font-extrabold text-dark dark:text-gray-100">
+                      <span className="text-lg font-bold text-dark dark:text-gray-100">
                         <SarIcon /> {price?.toLocaleString()}
                         <span className="text-xs font-normal text-gray-text">
                           /{billingCycle === "annually" ? "yr" : "mo"}

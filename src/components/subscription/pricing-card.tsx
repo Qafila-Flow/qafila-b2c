@@ -58,10 +58,10 @@ export function PricingCard({ plan, locale, billingCycle, isCurrentPlan }: Prici
         <h3 className="text-lg font-bold text-dark dark:text-gray-100">{planName}</h3>
         <div className="mt-3 flex items-baseline gap-1">
           {isFree ? (
-            <span className="text-3xl font-extrabold text-dark dark:text-gray-100">Free</span>
+            <span className="text-3xl font-bold text-dark dark:text-gray-100">Free</span>
           ) : (
             <>
-              <span className="text-3xl font-extrabold text-dark dark:text-gray-100">{price}</span>
+              <span className="text-3xl font-bold text-dark dark:text-gray-100">{price}</span>
               <span className="text-sm text-gray-text">
                 {plan.currency} / {billingCycle === "annually" ? "yr" : "mo"}
               </span>
