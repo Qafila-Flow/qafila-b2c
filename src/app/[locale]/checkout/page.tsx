@@ -75,12 +75,14 @@ export default function CheckoutPage() {
   if (items.length === 0 && !order) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-16">
+        {/* Same asset as the empty state on the cart page. */}
         <Image
-          src="/images/empty-cart.svg"
+          src="/images/bag.png"
           alt=""
-          width={200}
-          height={160}
-          className="mb-6"
+          width={330}
+          height={250}
+          priority
+          className="mb-6 h-auto w-64"
         />
         <p className="mb-6 text-lg text-gray-text">
           {t("checkout.emptyCart")}

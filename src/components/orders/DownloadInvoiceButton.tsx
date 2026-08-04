@@ -11,6 +11,8 @@ interface DownloadInvoiceButtonProps {
   /** `solid` for the post-checkout call to action, `outline` inside order detail. */
   variant?: "solid" | "outline";
   className?: string;
+  /** Passed through to the wrapper — used for stagger `animationDelay`. */
+  style?: React.CSSProperties;
 }
 
 export default function DownloadInvoiceButton({
@@ -18,6 +20,7 @@ export default function DownloadInvoiceButton({
   orderNumber,
   variant = "outline",
   className = "",
+  style,
 }: DownloadInvoiceButtonProps) {
   const t = useTranslations("invoice");
   // The PDF is rendered in whichever language the customer is browsing in.
@@ -46,7 +49,7 @@ export default function DownloadInvoiceButton({
       : "border-2 border-dark dark:border-gray-400 text-dark dark:text-gray-200 hover:bg-dark hover:text-white dark:hover:bg-gray-200 dark:hover:text-dark";
 
   return (
-    <div className={className}>
+    <div className={className} style={style}>
       <button onClick={handleClick} disabled={loading} className={`${base} ${skin}`}>
         {loading ? (
           <Loader2 size={16} className="animate-spin" />

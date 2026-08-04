@@ -133,28 +133,19 @@ export default function OrderConfirmation({ order }: { order: OrderResponse }) {
             />
           </dl>
 
-          <div
-            className="fade-rise mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row"
-            style={{ animationDelay: "300ms" }}
-          >
-            {/* An invoice only exists once payment settles — before that the
-                document would be a quote, not a tax invoice. */}
-            {order.paymentStatus === "PAID" && (
-              <DownloadInvoiceButton
-                orderId={order.id}
-                orderNumber={order.orderNumber}
-                variant="solid"
-                className="sm:w-56"
-              />
-            )}
-            <Link
-              href="/"
-              className="flex items-center justify-center gap-2 rounded-full border-2 border-dark px-6 py-3 text-sm font-semibold text-dark transition-colors hover:bg-dark hover:text-white sm:w-56 dark:border-gray-500 dark:text-gray-200 dark:hover:bg-gray-100 dark:hover:text-dark"
-            >
-              <Home size={16} />
-              {t("checkout.goHome")}
-            </Link>
-          </div>
+          {/* The invoice is the one action worth taking *here*; leaving the
+              page belongs at the end, after the order has been read. An
+              invoice also only exists once payment settles — before that the
+              document would be a quote, not a tax invoice. */}
+          {order.paymentStatus === "PAID" && (
+            <DownloadInvoiceButton
+              orderId={order.id}
+              orderNumber={order.orderNumber}
+              variant="solid"
+              className="fade-rise mt-8 w-full sm:w-64"
+              style={{ animationDelay: "300ms" }}
+            />
+          )}
         </div>
       </section>
 
@@ -296,13 +287,25 @@ export default function OrderConfirmation({ order }: { order: OrderResponse }) {
             </dl>
           </section>
 
-          <Link
-            href="/profile/orders"
-            className="block rounded-full py-2 text-center text-sm font-medium text-primary hover:underline"
-          >
-            {t("checkout.viewOrders")}
-          </Link>
         </aside>
+      </div>
+
+      {/* ── Leaving ────────────────────────────────────────────────────── */}
+      <div className="mx-auto mt-12 flex max-w-6xl flex-col items-center gap-4 px-4 sm:px-6">
+        <div className="h-px w-full max-w-xs bg-linear-to-r from-transparent via-gray-border to-transparent dark:via-gray-700" />
+        <Link
+          href="/"
+          className="flex w-full items-center justify-center gap-2 rounded-full border-2 border-dark px-6 py-3 text-sm font-semibold text-dark transition-colors hover:bg-dark hover:text-white sm:w-64 dark:border-gray-500 dark:text-gray-200 dark:hover:bg-gray-100 dark:hover:text-dark"
+        >
+          <Home size={16} />
+          {t("checkout.goHome")}
+        </Link>
+        <Link
+          href="/profile/orders"
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          {t("checkout.viewOrders")}
+        </Link>
       </div>
     </div>
   );
