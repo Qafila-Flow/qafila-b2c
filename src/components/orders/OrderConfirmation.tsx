@@ -61,15 +61,16 @@ export default function OrderConfirmation({ order }: { order: OrderResponse }) {
         </svg>
 
         <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 pt-10 pb-14 text-center sm:px-6">
+          {/* Same asset as the empty-cart screen in cart/page.tsx — the
+              branded Qafila gift box. It is RGBA with a transparent
+              background, so it needs no dark-theme treatment. */}
           <Image
-            src="/images/empty-cart.svg"
+            src="/images/bag.png"
             alt=""
-            width={260}
-            height={208}
+            width={330}
+            height={250}
             priority
-            /* The artwork is light line-art on transparent; at full strength
-               its near-white cart body glares against the dark theme. */
-            className="fade-rise mb-6 h-auto w-44 sm:w-56 dark:opacity-40"
+            className="fade-rise mb-6 h-auto w-56 sm:w-72"
           />
 
           {/* Payment state, not order state — the headline already says the
