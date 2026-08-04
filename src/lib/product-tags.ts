@@ -1,38 +1,50 @@
-import { Crown, Gem } from "lucide-react";
 import type { ProductTag } from "@/lib/api/products";
 
-/** Marketing tags that render as a text pill (icon + label). SAUDI_MADE is
- * intentionally excluded — it renders as an image seal (see {@link SAUDI_MADE_SEAL})
- * handled separately so it never collides with these pills. */
-export type PillTag = Exclude<ProductTag, "SAUDI_MADE">;
-
-export interface ProductTagStyle {
-  icon: typeof Crown;
-  /** Solid gradient pill — readable on any photo background */
-  pill: string;
-  /** i18n key under `productTag.<key>` */
-  key: "limitedEditions" | "luxuries";
+export interface TagBadge {
+  /** Public path to the badge artwork (self-contained pill, rounded corners baked in). */
+  src: string;
+  /** Intrinsic pixel size of the artwork — used for next/image ratio + sizing. */
+  width: number;
+  height: number;
+  /** i18n key under `productTag.<key>` — used for alt text / tooltips. */
+  key: "limitedEditions" | "luxuries" | "saudiMade";
 }
 
-export const TAG_STYLES: Record<PillTag, ProductTagStyle> = {
-  // Cohesive warm palette anchored on the brand amber (--color-primary #e8983a):
-  // amber hero / black-and-gold luxury / warm stone — one system, three tones.
+/**
+ * Every product tag renders as a ready-made badge image. The artwork already
+ * carries its own background, rounded corners and internal padding, so the
+ * badge must never be wrapped in a pill, border or extra background —
+ * only sized (fixed height, auto width) and spaced.
+ */
+export const TAG_BADGES: Record<ProductTag, TagBadge> = {
   LIMITED_EDITIONS: {
-    icon: Crown,
-    pill: "bg-gradient-to-r from-[#e8983a] to-[#c96a25] text-white shadow-md shadow-amber-900/30 ring-1 ring-white/20",
+    src: "/images/tags/limited-editions.png",
+    width: 940,
+    height: 240,
     key: "limitedEditions",
   },
   LUXURIES: {
-    icon: Gem,
-    pill: "bg-gradient-to-r from-neutral-900 to-neutral-800 text-white shadow-md shadow-black/30 ring-1 ring-amber-400/30",
+    src: "/images/tags/luxuries.png",
+    width: 940,
+    height: 240,
     key: "luxuries",
+  },
+  SAUDI_MADE: {
+    src: "/images/tags/saudi-made.png",
+    width: 940,
+    height: 240,
+    key: "saudiMade",
   },
 };
 
-/** Display priority — highest first. The top-priority tag claims the
- * prominent slot in compact layouts (e.g. the product card overlay). */
-export const TAG_PRIORITY: PillTag[] = ["LIMITED_EDITIONS", "LUXURIES"];
+/** Display priority — highest first. Drives the order badges are listed in. */
+export const TAG_PRIORITY: ProductTag[] = [
+  "SAUDI_MADE",
+  "LIMITED_EDITIONS",
+  "LUXURIES",
+];
 
-/** Public path to the "Saudi Made" seal asset. Rendered as an image badge
- * (not a text pill) so the made-in seal reads as a distinct mark. */
-export const SAUDI_MADE_SEAL = "/images/saudi-made.svg";
+/** Tags in display order, filtered to the ones a product actually has. */
+export function orderedTags(tags: ProductTag[] = []): ProductTag[] {
+  return TAG_PRIORITY.filter((tg) => tags.includes(tg));
+}

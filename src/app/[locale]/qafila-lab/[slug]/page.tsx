@@ -165,7 +165,7 @@ export default async function QafilaLabVendorPage({
                         ? t("designer")
                         : t("manufacturer")
                     }
-                    variant="dark"
+                    className="h-8 sm:h-9"
                   />
                 </div>
               )}

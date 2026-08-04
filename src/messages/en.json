@@ -486,7 +486,14 @@
     "viewOrders": "View My Orders",
     "paymentFailed": "Payment failed. Please try again.",
     "emptyCart": "Your cart is empty. Add items before checking out.",
-    "loginRequired": "Please log in to proceed with checkout."
+    "loginRequired": "Please log in to proceed with checkout.",
+    "goHome": "Back to home",
+    "placedOn": "Placed",
+    "shipments": "Shipments",
+    "yourShipments": "Your shipments",
+    "shipmentOf": "Shipment {index} of {total}",
+    "paid": "Paid",
+    "itemsLabel": "Items"
   },
   "orders": {
     "title": "Orders & Returns",
@@ -554,6 +561,12 @@
       "REFUNDED": "Your payment has been refunded"
     },
     "back": "Back"
+  },
+  "invoice": {
+    "title": "Invoice",
+    "download": "Download Invoice",
+    "preparing": "Preparing invoice...",
+    "failed": "Could not generate the invoice. Please try again."
   },
   "stories": {
     "title": "Stories",

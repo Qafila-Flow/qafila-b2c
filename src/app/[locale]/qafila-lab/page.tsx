@@ -144,7 +144,6 @@ export default async function QafilaLabIndexPage({
                                 ? t("designer")
                                 : t("manufacturer")
                             }
-                            variant="light"
                           />
                         </div>
                       )}

@@ -10,7 +10,8 @@ import { useAuth } from "@/lib/auth-context";
 import { getMediaUrl } from "@/lib/utils";
 import { useState } from "react";
 import type { ProductTag } from "@/lib/api/products";
-import { TAG_STYLES, TAG_PRIORITY, SAUDI_MADE_SEAL } from "@/lib/product-tags";
+import { TAG_BADGES, orderedTags } from "@/lib/product-tags";
+import TagBadge from "@/components/shared/TagBadge";
 
 export interface Product {
   id: string;
@@ -44,22 +45,11 @@ export default function ProductCard({
 
   const tt = useTranslations("productTag");
   const wishlisted = isInWishlist(product.id);
-  const tags = product.tags ?? [];
-  // The "Saudi Made" seal is an image badge that owns the top-start corner.
-  // When present it stacks below any sale badge and suppresses the marketing
-  // text-pill there, so the two never overlap.
-  const hasSaudiMade = tags.includes("SAUDI_MADE");
-  // Priority: Limited > Luxuries — the highest-priority tag claims
-  // the prominent top-start slot (when neither a sale badge nor the Saudi-Made
-  // seal is competing for it). Any remaining tags render as a uniform pill row
-  // along the bottom edge, which keeps contrast consistent across photos.
-  const primaryTag = TAG_PRIORITY.find((tg) => tags.includes(tg)) ?? null;
-  const showPrimaryPill =
-    primaryTag !== null && !product.badge && !hasSaudiMade;
-  const orderedTags = TAG_PRIORITY.filter((tg) => tags.includes(tg));
-  const bottomTags = showPrimaryPill
-    ? orderedTags.filter((tg) => tg !== primaryTag)
-    : orderedTags;
+  // Tag badges are self-contained artwork, so they all live in one top-left
+  // column — sale badge first, then the tags in priority order. Stacking them
+  // keeps every badge fully readable on narrow cards and away from the
+  // wishlist button in the opposite corner.
+  const cardTags = orderedTags(product.tags);
 
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -85,45 +75,30 @@ export default function ProductCard({
     >
       {/* Image */}
       <div className="relative mb-2.5 min-h-80 overflow-hidden rounded-t-lg bg-gray-100 dark:bg-dark">
-        {/* Top-left: sale badge takes priority, otherwise the highest-priority tag.
-            Uses physical `left` (not logical `start`) so it always shares the
-            left corner with the Saudi-Made seal, even in RTL. */}
-        {product.badge ? (
-          <span className="absolute left-2.5 top-2.5 z-10 rounded bg-discount px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-            {product.badge}
-          </span>
-        ) : showPrimaryPill && primaryTag ? (
-          (() => {
-            const style = TAG_STYLES[primaryTag];
-            const Icon = style.icon;
-            return (
-              <span
-                className={`absolute left-2.5 top-2.5 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${style.pill}`}
-              >
-                <Icon size={10} strokeWidth={2.5} />
-                {tt(style.key)}
+        {/* Top-left stack: sale badge, then the tag badges. Uses physical
+            `left` (not logical `start`) so it stays on the left in RTL too,
+            and inset padding so nothing sits flush against the card edge. */}
+        {(product.badge || cardTags.length > 0) && (
+          <div className="absolute left-2.5 top-2.5 z-10 flex flex-col items-start gap-1.5">
+            {product.badge && (
+              <span className="rounded bg-discount px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                {product.badge}
               </span>
-            );
-          })()
-        ) : null}
-
-        {/* Saudi-Made seal — image badge always pinned to the top-LEFT corner.
-            Uses physical `left` (not logical `start`) so it stays on the left
-            in RTL too. Stacks below a sale badge when one is present so the two
-            never overlap.
-            Plain <img>: the SVG lives in /public and would 404 through the
-            next/image optimizer (dangerouslyAllowSVG is off). */}
-        {hasSaudiMade && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={SAUDI_MADE_SEAL}
-            alt={tt("saudiMade")}
-            width={46}
-            height={31}
-            className={`absolute left-0 z-10 h-auto w-11 drop-shadow-md ${
-              product.badge ? "top-9" : "top-2.5"
-            }`}
-          />
+            )}
+            {cardTags.map((tg) => {
+              const badge = TAG_BADGES[tg];
+              return (
+                <TagBadge
+                  key={tg}
+                  src={badge.src}
+                  width={badge.width}
+                  height={badge.height}
+                  label={tt(badge.key)}
+                  className="h-7 drop-shadow-md"
+                />
+              );
+            })}
+          </div>
         )}
 
         {/* Top-right: wishlist only — kept clean and isolated. Uses physical
@@ -143,25 +118,6 @@ export default function ProductCard({
           />
         </button>
 
-        {/* Bottom-start: remaining tag pills sit on a soft gradient scrim
-            so they read clearly regardless of the underlying photo */}
-        {bottomTags.length > 0 && (
-          <div className="absolute inset-x-0 bottom-0 z-10 flex flex-wrap items-end gap-1.5 bg-gradient-to-t from-black/45 via-black/15 to-transparent px-2.5 pb-2 pt-6">
-            {bottomTags.map((tg) => {
-              const style = TAG_STYLES[tg];
-              const Icon = style.icon;
-              return (
-                <span
-                  key={tg}
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${style.pill}`}
-                >
-                  <Icon size={9} strokeWidth={2.5} />
-                  {tt(style.key)}
-                </span>
-              );
-            })}
-          </div>
-        )}
         {product.image ? (
           <Image
             src={getMediaUrl(product.image) || product.image}

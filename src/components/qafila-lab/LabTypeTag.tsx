@@ -1,44 +1,52 @@
-import { Gem, Factory } from "lucide-react";
+import TagBadge from "@/components/shared/TagBadge";
 
 export type QafilaLabType = "DESIGNER" | "MANUFACTURER";
+
+/** Ready-made badge artwork per specialization — background, rounded corners
+ * and internal padding are baked into the PNG, so the badge is only sized. */
+const BADGES: Record<QafilaLabType, { src: string; width: number; height: number }> = {
+  DESIGNER: {
+    src: "/images/tags/brand-designer.png",
+    width: 940,
+    height: 240,
+  },
+  MANUFACTURER: {
+    src: "/images/tags/brand-manufacturer.png",
+    width: 1049,
+    height: 240,
+  },
+};
 
 interface LabTypeTagProps {
   /** Vendor specialization. When null/undefined the tag renders nothing. */
   type?: QafilaLabType | null;
   /** Localized label for the type (e.g. "Brand Designer"). */
   label: string;
-  /** `light` for white cards, `dark` for the gold-on-dark surfaces. */
-  variant?: "light" | "dark";
+  /** Height utility for the badge (width follows automatically). */
   className?: string;
 }
 
-const styles: Record<NonNullable<LabTypeTagProps["variant"]>, string> = {
-  light:
-    "border-amber-200 bg-gradient-to-r from-amber-50 to-amber-100/60 text-amber-700",
-  dark: "border-amber-400/30 bg-amber-500/15 text-amber-200 backdrop-blur",
-};
-
 /**
- * Elegant premium tag flagging a Qafila Lab vendor as a Brand Designer or
- * Brand Manufacturer. Used across the listing cards, homepage section, and
- * the brand profile hero. Renders nothing when no specialization is set.
+ * Badge flagging a Qafila Lab vendor as a Brand Designer or Brand
+ * Manufacturer. Used across the listing cards, homepage section, and the
+ * brand profile hero. Renders nothing when no specialization is set.
  */
 export default function LabTypeTag({
   type,
   label,
-  variant = "light",
-  className = "",
+  className = "h-7",
 }: LabTypeTagProps) {
   if (!type) return null;
 
-  const Icon = type === "DESIGNER" ? Gem : Factory;
+  const badge = BADGES[type];
 
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${styles[variant]} ${className}`}
-    >
-      <Icon className="h-3 w-3" />
-      {label}
-    </span>
+    <TagBadge
+      src={badge.src}
+      width={badge.width}
+      height={badge.height}
+      label={label}
+      className={className}
+    />
   );
 }

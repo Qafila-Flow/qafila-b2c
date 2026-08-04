@@ -9,7 +9,6 @@ import {
   MapPin,
   StickyNote,
   CreditCard,
-  CheckCircle,
   ChevronRight,
   Plus,
   ShoppingBag,
@@ -20,6 +19,7 @@ import type { OrderResponse } from "@/types/order";
 import Image from "next/image";
 import { getMediaUrl } from "@/lib/utils";
 import SarIcon from "@/components/shared/SarIcon";
+import OrderConfirmation from "@/components/orders/OrderConfirmation";
 
 export default function CheckoutPage() {
   const t = useTranslations();
@@ -95,36 +95,10 @@ export default function CheckoutPage() {
     );
   }
 
-  // Order success
+  // Order success — full confirmation: every shipment, where it's going, and
+  // the invoice, without making the customer go hunting in order history.
   if (order) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-16">
-        <CheckCircle size={64} className="mb-4 text-green" />
-        <h1 className="mb-2 text-2xl font-bold text-dark dark:text-gray-100">
-          {t("checkout.orderPlaced")}
-        </h1>
-        <p className="mb-2 text-sm text-gray-text">
-          {t("checkout.orderNumber")}: {order.orderNumber}
-        </p>
-        <p className="mb-8 max-w-md text-center text-gray-text">
-          {t("checkout.orderConfirmation")}
-        </p>
-        <div className="flex gap-3">
-          <Link
-            href="/"
-            className="rounded-full border border-gray-border dark:border-gray-700 px-6 py-3 text-sm font-semibold text-dark dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-dark/80"
-          >
-            {t("checkout.continueShopping")}
-          </Link>
-          <Link
-            href="/profile/orders"
-            className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
-          >
-            {t("checkout.viewOrders")}
-          </Link>
-        </div>
-      </div>
-    );
+    return <OrderConfirmation order={order} />;
   }
 
   const handlePlaceOrder = async () => {

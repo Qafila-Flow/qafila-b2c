@@ -2,11 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import type { ProductTag } from "@/lib/api/products";
-import { TAG_STYLES, TAG_PRIORITY, SAUDI_MADE_SEAL } from "@/lib/product-tags";
+import { TAG_BADGES, orderedTags } from "@/lib/product-tags";
+import TagBadge from "@/components/shared/TagBadge";
 
 /**
- * Renders a product's tags as a row of gradient pills, with the "Saudi Made"
- * seal shown as an image badge ahead of them.
+ * Renders a product's tags as a row of badge images.
  * Returns nothing when the product has no tags.
  */
 export default function ProductTags({
@@ -17,33 +17,22 @@ export default function ProductTags({
   className?: string;
 }) {
   const tt = useTranslations("productTag");
-  const ordered = TAG_PRIORITY.filter((tg) => tags.includes(tg));
-  const hasSaudiMade = tags.includes("SAUDI_MADE");
-  if (ordered.length === 0 && !hasSaudiMade) return null;
+  const ordered = orderedTags(tags);
+  if (ordered.length === 0) return null;
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
-      {hasSaudiMade && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={SAUDI_MADE_SEAL}
-          alt={tt("saudiMade")}
-          width={52}
-          height={35}
-          className="h-7 w-auto drop-shadow-sm"
-        />
-      )}
       {ordered.map((tg) => {
-        const style = TAG_STYLES[tg];
-        const Icon = style.icon;
+        const badge = TAG_BADGES[tg];
         return (
-          <span
+          <TagBadge
             key={tg}
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${style.pill}`}
-          >
-            <Icon size={12} strokeWidth={2.5} />
-            {tt(style.key)}
-          </span>
+            src={badge.src}
+            width={badge.width}
+            height={badge.height}
+            label={tt(badge.key)}
+            className="h-8 sm:h-9"
+          />
         );
       })}
     </div>

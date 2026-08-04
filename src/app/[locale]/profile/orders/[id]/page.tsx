@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import SarIcon from "@/components/shared/SarIcon";
+import DownloadInvoiceButton from "@/components/orders/DownloadInvoiceButton";
 
 export default function OrderDetailPage() {
   const t = useTranslations("orders");
@@ -208,6 +209,14 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* Invoice — available for the life of the order, not just at checkout */}
+          {order.paymentStatus === "PAID" && (
+            <DownloadInvoiceButton
+              orderId={order.id}
+              orderNumber={order.orderNumber}
+            />
+          )}
 
           {/* Cancel button */}
           {canCancel && activeItems.length > 0 && (

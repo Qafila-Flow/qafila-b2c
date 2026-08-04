@@ -100,7 +100,6 @@ export default async function QafilaLabSection({ vendors, locale }: Props) {
                             ? t("designer")
                             : t("manufacturer")
                         }
-                        variant="dark"
                       />
                     </div>
                   )}
