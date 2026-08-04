@@ -221,7 +221,11 @@ export default function CheckoutPage() {
                         )}
                       </div>
                       <p className="mt-1 text-sm text-gray-text">
-                        {addr.street}, {addr.area}, {addr.city}
+                        {addr.street}, {addr.area},{" "}
+                        {/* Prefer the canonical bilingual name; fall back to the
+                            stored free text on legacy, unmapped addresses. */}
+                        {(locale === "ar" ? addr.cityNameAr : addr.cityNameEn) ??
+                          addr.city}
                       </p>
                       <p className="text-sm text-gray-text">
                         {addr.phoneNumber}

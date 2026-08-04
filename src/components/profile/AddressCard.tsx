@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   MapPin,
   Pencil,
@@ -33,6 +33,7 @@ export default function AddressCard({
   onSetDefault,
 }: AddressCardProps) {
   const t = useTranslations("addresses");
+  const locale = useLocale();
 
   const TypeIcon = typeIcons[address.type] || MapPin;
 
@@ -98,7 +99,11 @@ export default function AddressCard({
           {address.apartmentNo && `, ${address.apartmentNo}`}
         </p>
         <p className="text-sm text-gray-text">
-          {address.area}, {address.city}
+          {address.area},{" "}
+          {/* Canonical bilingual name when the city is mapped; the original
+              free text otherwise, so a legacy address never renders blank. */}
+          {(locale === "ar" ? address.cityNameAr : address.cityNameEn) ??
+            address.city}
         </p>
         {address.directions && (
           <p className="text-xs text-gray-text italic">{address.directions}</p>

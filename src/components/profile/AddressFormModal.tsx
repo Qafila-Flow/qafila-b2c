@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
+import CityRegionSelect from "@/components/address/CityRegionSelect";
+import type { City } from "@/lib/api/cities";
 import type {
   Address,
   AddressType,
@@ -29,7 +31,8 @@ export default function AddressFormModal({
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [street, setStreet] = useState("");
-  const [city, setCity] = useState("");
+  const [cityId, setCityId] = useState<string | null>(null);
+  const [cityName, setCityName] = useState("");
   const [area, setArea] = useState("");
   const [apartmentNo, setApartmentNo] = useState("");
   const [directions, setDirections] = useState("");
@@ -47,7 +50,8 @@ export default function AddressFormModal({
       setLastName(address.lastName);
       setPhoneNumber(address.phoneNumber);
       setStreet(address.street);
-      setCity(address.city);
+      setCityId(address.cityId ?? null);
+      setCityName(address.city);
       setArea(address.area);
       setApartmentNo(address.apartmentNo || "");
       setDirections(address.directions || "");
@@ -58,7 +62,8 @@ export default function AddressFormModal({
       setLastName("");
       setPhoneNumber("");
       setStreet("");
-      setCity("");
+      setCityId(null);
+      setCityName("");
       setArea("");
       setApartmentNo("");
       setDirections("");
@@ -69,6 +74,14 @@ export default function AddressFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // The city picker is a custom control, so it sits outside native form
+    // validation and has to be checked here.
+    if (!cityId) {
+      setError(t("cityRequired"));
+      return;
+    }
+
     setSaving(true);
     setError("");
 
@@ -79,7 +92,10 @@ export default function AddressFormModal({
         lastName: lastName.trim(),
         phoneNumber: phoneNumber.trim(),
         street: street.trim(),
-        city: city.trim(),
+        cityId,
+        // Sent alongside cityId during the transition; the server derives the
+        // canonical name from cityId regardless.
+        city: cityName.trim() || undefined,
         area: area.trim(),
         apartmentNo: apartmentNo.trim() || undefined,
         directions: directions.trim() || undefined,
@@ -186,25 +202,28 @@ export default function AddressFormModal({
             className="w-full rounded-lg border border-gray-border px-4 py-3 text-sm outline-none transition-colors placeholder:text-gray-text focus:border-dark"
           />
 
-          {/* City & Area */}
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder={`${t("city")}*`}
-              required
-              className="w-full rounded-lg border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm text-dark dark:text-gray-200 outline-none transition-colors placeholder:text-gray-text dark:placeholder:text-gray-500 focus:border-dark"
-            />
-            <input
-              type="text"
-              value={area}
-              onChange={(e) => setArea(e.target.value)}
-              placeholder={`${t("area")}*`}
-              required
-              className="w-full rounded-lg border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm text-dark dark:text-gray-200 outline-none transition-colors placeholder:text-gray-text dark:placeholder:text-gray-500 focus:border-dark"
-            />
-          </div>
+          {/* Region & City */}
+          <CityRegionSelect
+            value={cityId}
+            onChange={(id, selected: City | null) => {
+              setCityId(id);
+              setCityName(selected?.nameEn ?? "");
+              if (id) setError("");
+            }}
+            legacyCityName={isEditing && !cityId ? cityName : null}
+            required
+          />
+
+          {/* Area — stays free text; neighbourhoods are too numerous and too
+              local to enumerate, and the map only needs city granularity. */}
+          <input
+            type="text"
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            placeholder={`${t("area")}*`}
+            required
+            className="w-full rounded-lg border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm text-dark dark:text-gray-200 outline-none transition-colors placeholder:text-gray-text dark:placeholder:text-gray-500 focus:border-dark"
+          />
 
           {/* Apartment No */}
           <input

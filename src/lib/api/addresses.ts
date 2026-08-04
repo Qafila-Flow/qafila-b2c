@@ -1,4 +1,5 @@
 import apiClient from "./client";
+import type { SaudiRegionCode } from "./cities";
 
 export type AddressType = "HOME" | "WORK" | "OTHER";
 
@@ -9,7 +10,15 @@ export interface Address {
   lastName: string;
   phoneNumber: string;
   street: string;
+  /** Canonical name once resolved; otherwise whatever the user originally typed. */
   city: string;
+  /** Null on legacy addresses saved before the city list existed. */
+  cityId: string | null;
+  cityNameEn: string | null;
+  cityNameAr: string | null;
+  region: SaudiRegionCode | null;
+  regionNameEn: string | null;
+  regionNameAr: string | null;
   area: string;
   apartmentNo?: string;
   directions?: string;
@@ -33,7 +42,16 @@ export interface CreateAddressPayload {
   lastName: string;
   phoneNumber: string;
   street: string;
-  city: string;
+  /**
+   * Canonical city id from GET /cities. Send this — it is what places the
+   * address on the admin distribution map. The region is derived server-side.
+   */
+  cityId?: string;
+  /**
+   * Free-text city name. Deprecated; still sent alongside cityId so anything
+   * reading the raw payload keeps working during the transition.
+   */
+  city?: string;
   area: string;
   apartmentNo?: string;
   directions?: string;

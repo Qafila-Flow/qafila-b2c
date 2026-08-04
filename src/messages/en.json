@@ -392,7 +392,17 @@
     "deleting": "Deleting...",
     "deleteConfirmTitle": "Delete Address?",
     "deleteConfirmDesc": "This address will be removed from your account. This action cannot be undone.",
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "region": "Region",
+    "selectRegion": "Select region",
+    "selectRegionFirst": "Select a region first",
+    "selectCity": "Select city",
+    "searchCity": "Search city...",
+    "noCitiesFound": "No matching city",
+    "cityRequired": "Please select your city",
+    "loading": "Loading...",
+    "cityListUnavailable": "City list could not be loaded. Please refresh and try again.",
+    "legacyCityHint": "Currently saved as \"{city}\" — please reselect your city."
   },
   "categoryPage": {
     "home": "Home",
