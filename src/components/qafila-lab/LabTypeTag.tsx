@@ -3,18 +3,13 @@ import TagBadge from "@/components/shared/TagBadge";
 export type QafilaLabType = "DESIGNER" | "MANUFACTURER";
 
 /** Ready-made badge artwork per specialization — background, rounded corners
- * and internal padding are baked into the PNG, so the badge is only sized. */
-const BADGES: Record<QafilaLabType, { src: string; width: number; height: number }> = {
-  DESIGNER: {
-    src: "/images/tags/brand-designer.png",
-    width: 940,
-    height: 240,
-  },
-  MANUFACTURER: {
-    src: "/images/tags/brand-manufacturer.png",
-    width: 1049,
-    height: 240,
-  },
+ * and internal padding are baked into the PNG, so the badge is only sized.
+ * Both share one 1160×240 canvas with identical padding, so the two render at
+ * exactly the same size. */
+const BADGE_SIZE = { width: 1160, height: 240 };
+const BADGE_SRC: Record<QafilaLabType, string> = {
+  DESIGNER: "/images/tags/brand-designer.png",
+  MANUFACTURER: "/images/tags/brand-manufacturer.png",
 };
 
 interface LabTypeTagProps {
@@ -38,15 +33,13 @@ export default function LabTypeTag({
 }: LabTypeTagProps) {
   if (!type) return null;
 
-  const badge = BADGES[type];
-
   return (
     <TagBadge
-      src={badge.src}
-      width={badge.width}
-      height={badge.height}
+      src={BADGE_SRC[type]}
+      width={BADGE_SIZE.width}
+      height={BADGE_SIZE.height}
       label={label}
-      className={className}
+      className={`max-w-full ${className}`}
     />
   );
 }

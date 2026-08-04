@@ -10,8 +10,13 @@ import { useAuth } from "@/lib/auth-context";
 import { getMediaUrl } from "@/lib/utils";
 import { useState } from "react";
 import type { ProductTag } from "@/lib/api/products";
-import { TAG_BADGES, orderedTags } from "@/lib/product-tags";
+import { TAG_BADGES, MARKETING_TAGS } from "@/lib/product-tags";
 import TagBadge from "@/components/shared/TagBadge";
+
+/** Card overlay badge sizing. The width cap keeps the two bottom-corner
+ * badges from meeting on narrow cards; `object-contain` scales rather than
+ * crops when it bites. */
+const CARD_BADGE = "h-6 max-w-[40%] drop-shadow-md";
 
 export interface Product {
   id: string;
@@ -45,11 +50,15 @@ export default function ProductCard({
 
   const tt = useTranslations("productTag");
   const wishlisted = isInWishlist(product.id);
-  // Tag badges are self-contained artwork, so they all live in one top-left
-  // column — sale badge first, then the tags in priority order. Stacking them
-  // keeps every badge fully readable on narrow cards and away from the
-  // wishlist button in the opposite corner.
-  const cardTags = orderedTags(product.tags);
+  // Badges are spread over three corners instead of stacked in one: the
+  // headline marketing tag sits top-start under any sale badge, the Saudi-Made
+  // seal owns the bottom-start corner, and a second marketing tag (rare) goes
+  // bottom-end. The wishlist button keeps the top-end corner to itself.
+  const tags = product.tags ?? [];
+  const marketing = MARKETING_TAGS.filter((tg) => tags.includes(tg));
+  const topTag = marketing[0] ?? null;
+  const bottomEndTag = marketing[1] ?? null;
+  const hasSaudiMade = tags.includes("SAUDI_MADE");
 
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -75,30 +84,48 @@ export default function ProductCard({
     >
       {/* Image */}
       <div className="relative mb-2.5 min-h-80 overflow-hidden rounded-t-lg bg-gray-100 dark:bg-dark">
-        {/* Top-left stack: sale badge, then the tag badges. Uses physical
-            `left` (not logical `start`) so it stays on the left in RTL too,
-            and inset padding so nothing sits flush against the card edge. */}
-        {(product.badge || cardTags.length > 0) && (
+        {/* Top-left: sale badge, then the headline marketing tag. All corner
+            overlays use physical `left`/`right` (not logical `start`/`end`) so
+            they hold their place in RTL, and are inset from the card edge. */}
+        {(product.badge || topTag) && (
           <div className="absolute left-2.5 top-2.5 z-10 flex flex-col items-start gap-1.5">
             {product.badge && (
               <span className="rounded bg-discount px-2 py-0.5 text-[10px] font-bold uppercase text-white">
                 {product.badge}
               </span>
             )}
-            {cardTags.map((tg) => {
-              const badge = TAG_BADGES[tg];
-              return (
-                <TagBadge
-                  key={tg}
-                  src={badge.src}
-                  width={badge.width}
-                  height={badge.height}
-                  label={tt(badge.key)}
-                  className="h-7 drop-shadow-md"
-                />
-              );
-            })}
+            {topTag && (
+              <TagBadge
+                src={TAG_BADGES[topTag].src}
+                width={TAG_BADGES[topTag].width}
+                height={TAG_BADGES[topTag].height}
+                label={tt(TAG_BADGES[topTag].key)}
+                className={CARD_BADGE}
+              />
+            )}
           </div>
+        )}
+
+        {/* Bottom-left: the Saudi-Made provenance seal. */}
+        {hasSaudiMade && (
+          <TagBadge
+            src={TAG_BADGES.SAUDI_MADE.src}
+            width={TAG_BADGES.SAUDI_MADE.width}
+            height={TAG_BADGES.SAUDI_MADE.height}
+            label={tt(TAG_BADGES.SAUDI_MADE.key)}
+            className={`absolute bottom-2.5 left-2.5 z-10 ${CARD_BADGE}`}
+          />
+        )}
+
+        {/* Bottom-right: overflow marketing tag, kept opposite the seal. */}
+        {bottomEndTag && (
+          <TagBadge
+            src={TAG_BADGES[bottomEndTag].src}
+            width={TAG_BADGES[bottomEndTag].width}
+            height={TAG_BADGES[bottomEndTag].height}
+            label={tt(TAG_BADGES[bottomEndTag].key)}
+            className={`absolute bottom-2.5 right-2.5 z-10 ${CARD_BADGE}`}
+          />
         )}
 
         {/* Top-right: wishlist only — kept clean and isolated. Uses physical

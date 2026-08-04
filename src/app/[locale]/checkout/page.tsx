@@ -149,7 +149,7 @@ export default function CheckoutPage() {
 
             {addressLoading ? (
               <div className="flex h-20 items-center justify-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-border border-t-primary" />
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-border dark:border-gray-700 border-t-primary dark:border-t-primary" />
               </div>
             ) : addresses.length === 0 ? (
               <div className="py-4 text-center">
@@ -172,7 +172,7 @@ export default function CheckoutPage() {
                     className={`flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors ${
                       selectedAddressId === addr.id
                         ? "border-primary bg-primary/5"
-                        : "border-gray-border hover:border-gray-text"
+                        : "border-gray-border hover:border-gray-text dark:border-gray-700 dark:hover:border-gray-500"
                     }`}
                   >
                     <input
@@ -185,7 +185,7 @@ export default function CheckoutPage() {
                     />
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-dark">
+                        <span className="text-sm font-semibold text-dark dark:text-gray-100">
                           {addr.firstName} {addr.lastName}
                         </span>
                         {addr.isDefault && (
@@ -245,7 +245,7 @@ export default function CheckoutPage() {
                   readOnly
                   className="accent-primary"
                 />
-                <span className="text-sm font-medium text-dark">
+                <span className="text-sm font-medium text-dark dark:text-gray-100">
                   {t("checkout.mockPayment")}
                 </span>
               </div>
@@ -264,7 +264,7 @@ export default function CheckoutPage() {
             <div className="mb-4 max-h-60 space-y-3 overflow-y-auto">
               {items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3">
-                  <div className="relative h-12 w-10 shrink-0 overflow-hidden rounded bg-gray-light">
+                  <div className="relative h-12 w-10 shrink-0 overflow-hidden rounded bg-gray-light dark:bg-white/5">
                     {item.productImage ? (
                       <Image
                         src={getMediaUrl(item.productImage) || item.productImage}
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 truncate text-xs text-dark">
+                  <div className="flex-1 truncate text-xs text-dark dark:text-gray-200">
                     {locale === "ar"
                       ? item.productTitleAr
                       : item.productTitle}

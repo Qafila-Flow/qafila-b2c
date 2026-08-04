@@ -62,7 +62,12 @@ export interface VendorInfo {
 export interface VendorOrderResponse {
   id: string;
   vendorId: string;
-  vendor: VendorInfo;
+  /**
+   * Optional: the API omits this on any order path that doesn't include the
+   * vendor relation. Declaring it required hid a real runtime crash, so treat
+   * it as absent-until-proven-present at every call site.
+   */
+  vendor?: VendorInfo;
   vendorOrderNumber: string;
   status: OrderStatus;
   subtotal: number;

@@ -189,11 +189,15 @@ export default function OrderConfirmation({ order }: { order: OrderResponse }) {
                   <header className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-border bg-gray-light/60 px-5 py-3 dark:border-gray-700 dark:bg-white/[0.03]">
                     <div className="flex min-w-0 items-center gap-2">
                       <span className="truncate text-sm font-bold text-dark dark:text-gray-100">
-                        {locale === "ar"
-                          ? vo.vendor.storeNameAr
-                          : vo.vendor.storeName}
+                        {/* Fall back to the shipment label rather than blanking
+                            the header if the API omitted the vendor relation. */}
+                        {(locale === "ar"
+                          ? vo.vendor?.storeNameAr
+                          : vo.vendor?.storeName) ??
+                          vo.vendor?.storeName ??
+                          t("checkout.shipment")}
                       </span>
-                      {vo.vendor.isVerified && (
+                      {vo.vendor?.isVerified && (
                         <BadgeCheck
                           size={15}
                           className="shrink-0 text-green"
