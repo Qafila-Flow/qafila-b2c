@@ -29,7 +29,7 @@ interface LabTypeTagProps {
 export default function LabTypeTag({
   type,
   label,
-  className = "h-7",
+  className = "h-7 w-auto",
 }: LabTypeTagProps) {
   if (!type) return null;
 

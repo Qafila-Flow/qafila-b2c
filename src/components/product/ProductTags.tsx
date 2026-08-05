@@ -31,7 +31,7 @@ export default function ProductTags({
             width={badge.width}
             height={badge.height}
             label={tt(badge.key)}
-            className="h-8 sm:h-9"
+            className="h-8 w-auto shrink-0 sm:h-9"
           />
         );
       })}

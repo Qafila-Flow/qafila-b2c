@@ -13,10 +13,11 @@ import type { ProductTag } from "@/lib/api/products";
 import { TAG_BADGES, MARKETING_TAGS } from "@/lib/product-tags";
 import TagBadge from "@/components/shared/TagBadge";
 
-/** Card overlay badge sizing. The width cap keeps the two bottom-corner
- * badges from meeting on narrow cards; `object-contain` scales rather than
- * crops when it bites. */
-const CARD_BADGE = "h-6 max-w-[40%] drop-shadow-md";
+/** Every corner slot is the same fraction of the card, and every badge fills
+ * its slot — so all badges render at an identical size and the two bottom
+ * ones can never meet, whatever the card width. */
+const BADGE_SLOT = "w-[38%]";
+const CARD_BADGE = "h-auto w-full drop-shadow-md";
 
 export interface Product {
   id: string;
@@ -84,49 +85,58 @@ export default function ProductCard({
     >
       {/* Image */}
       <div className="relative mb-2.5 min-h-80 overflow-hidden rounded-t-lg bg-gray-100 dark:bg-dark">
-        {/* Top-left: sale badge, then the headline marketing tag. All corner
-            overlays use physical `left`/`right` (not logical `start`/`end`) so
-            they hold their place in RTL, and are inset from the card edge. */}
-        {(product.badge || topTag) && (
-          <div className="absolute left-2.5 top-2.5 z-10 flex flex-col items-start gap-1.5">
-            {product.badge && (
-              <span className="rounded bg-discount px-2 py-0.5 text-[10px] font-bold uppercase text-white">
-                {product.badge}
-              </span>
-            )}
-            {topTag && (
+        {/* Corner overlays. They share this one full-size layer so every slot
+            sizes off the same box, and use physical `left`/`right` (not
+            logical `start`/`end`) so they hold their place in RTL. */}
+        <div className="pointer-events-none absolute inset-0 z-10">
+          {/* Top-left: sale badge, then the headline marketing tag. */}
+          {(product.badge || topTag) && (
+            <div
+              className={`absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5 ${BADGE_SLOT}`}
+            >
+              {product.badge && (
+                <span className="rounded bg-discount px-2 py-0.5 text-[10px] font-bold uppercase text-white">
+                  {product.badge}
+                </span>
+              )}
+              {topTag && (
+                <TagBadge
+                  src={TAG_BADGES[topTag].src}
+                  width={TAG_BADGES[topTag].width}
+                  height={TAG_BADGES[topTag].height}
+                  label={tt(TAG_BADGES[topTag].key)}
+                  className={CARD_BADGE}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Bottom-left: the Saudi-Made provenance seal. */}
+          {hasSaudiMade && (
+            <div className={`absolute bottom-2.5 left-2.5 ${BADGE_SLOT}`}>
               <TagBadge
-                src={TAG_BADGES[topTag].src}
-                width={TAG_BADGES[topTag].width}
-                height={TAG_BADGES[topTag].height}
-                label={tt(TAG_BADGES[topTag].key)}
+                src={TAG_BADGES.SAUDI_MADE.src}
+                width={TAG_BADGES.SAUDI_MADE.width}
+                height={TAG_BADGES.SAUDI_MADE.height}
+                label={tt(TAG_BADGES.SAUDI_MADE.key)}
                 className={CARD_BADGE}
               />
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Bottom-left: the Saudi-Made provenance seal. */}
-        {hasSaudiMade && (
-          <TagBadge
-            src={TAG_BADGES.SAUDI_MADE.src}
-            width={TAG_BADGES.SAUDI_MADE.width}
-            height={TAG_BADGES.SAUDI_MADE.height}
-            label={tt(TAG_BADGES.SAUDI_MADE.key)}
-            className={`absolute bottom-2.5 left-2.5 z-10 ${CARD_BADGE}`}
-          />
-        )}
-
-        {/* Bottom-right: overflow marketing tag, kept opposite the seal. */}
-        {bottomEndTag && (
-          <TagBadge
-            src={TAG_BADGES[bottomEndTag].src}
-            width={TAG_BADGES[bottomEndTag].width}
-            height={TAG_BADGES[bottomEndTag].height}
-            label={tt(TAG_BADGES[bottomEndTag].key)}
-            className={`absolute bottom-2.5 right-2.5 z-10 ${CARD_BADGE}`}
-          />
-        )}
+          {/* Bottom-right: overflow marketing tag, kept opposite the seal. */}
+          {bottomEndTag && (
+            <div className={`absolute bottom-2.5 right-2.5 ${BADGE_SLOT}`}>
+              <TagBadge
+                src={TAG_BADGES[bottomEndTag].src}
+                width={TAG_BADGES[bottomEndTag].width}
+                height={TAG_BADGES[bottomEndTag].height}
+                label={tt(TAG_BADGES[bottomEndTag].key)}
+                className={CARD_BADGE}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Top-right: wishlist only — kept clean and isolated. Uses physical
             `right` (not logical `end`) so it stays on the right in RTL too. */}
