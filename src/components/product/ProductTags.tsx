@@ -1,8 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import type { ProductTag } from "@/lib/api/products";
-import { TAG_BADGES, orderedTags } from "@/lib/product-tags";
+import { TAG_BADGES, orderedTags, tagBadgeSrc } from "@/lib/product-tags";
 import TagBadge from "@/components/shared/TagBadge";
 
 /**
@@ -17,22 +17,20 @@ export default function ProductTags({
   className?: string;
 }) {
   const tt = useTranslations("productTag");
+  const locale = useLocale();
   const ordered = orderedTags(tags);
   if (ordered.length === 0) return null;
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>
-      {ordered.map((tg) => {
-        const badge = TAG_BADGES[tg];
-        return (
-          <TagBadge
-            key={tg}
-            src={badge.src}
-            label={tt(badge.key)}
-            className="h-8 w-auto shrink-0 sm:h-9"
-          />
-        );
-      })}
+      {ordered.map((tg) => (
+        <TagBadge
+          key={tg}
+          src={tagBadgeSrc(tg, locale)}
+          label={tt(TAG_BADGES[tg].key)}
+          className="h-8 w-auto shrink-0 sm:h-9"
+        />
+      ))}
     </div>
   );
 }

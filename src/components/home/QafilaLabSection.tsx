@@ -95,6 +95,7 @@ export default async function QafilaLabSection({ vendors, locale }: Props) {
                     <div className="mt-2">
                       <LabTypeTag
                         type={vendor.qafilaLabType}
+                        locale={locale}
                         label={
                           vendor.qafilaLabType === "DESIGNER"
                             ? t("designer")

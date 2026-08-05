@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Heart, Star, TrendingUp } from "lucide-react";
 import SarIcon from "@/components/shared/SarIcon";
 import { Link } from "@/i18n/navigation";
@@ -10,14 +10,16 @@ import { useAuth } from "@/lib/auth-context";
 import { getMediaUrl } from "@/lib/utils";
 import { useState } from "react";
 import type { ProductTag } from "@/lib/api/products";
-import { TAG_BADGES, MARKETING_TAGS } from "@/lib/product-tags";
+import { TAG_BADGES, MARKETING_TAGS, tagBadgeSrc } from "@/lib/product-tags";
 import TagBadge from "@/components/shared/TagBadge";
 
-/** Every corner slot is the same fraction of the card, and every badge fills
- * its slot — so all badges render at an identical size and the two bottom
- * ones can never meet, whatever the card width. */
-const BADGE_SLOT = "w-[38%]";
-const CARD_BADGE = "h-auto w-full drop-shadow-md";
+/** The artwork is drawn to a common height, so badges are sized by height and
+ * let their width follow the label — capping the width instead would give
+ * badges of different ratios different heights. The height steps down on
+ * narrow cards so the two bottom-corner badges always clear each other; the
+ * max-width is only a backstop for an unusually long label. */
+const CARD_BADGE = "h-5 w-auto drop-shadow-md md:h-6";
+const BADGE_CAP = "max-w-[45%]";
 
 export interface Product {
   id: string;
@@ -50,6 +52,7 @@ export default function ProductCard({
   const [toggling, setToggling] = useState(false);
 
   const tt = useTranslations("productTag");
+  const locale = useLocale();
   const wishlisted = isInWishlist(product.id);
   // Badges are spread over three corners instead of stacked in one: the
   // headline marketing tag sits top-start under any sale badge, the Saudi-Made
@@ -89,46 +92,50 @@ export default function ProductCard({
             sizes off the same box, and use physical `left`/`right` (not
             logical `start`/`end`) so they hold their place in RTL. */}
         <div className="pointer-events-none absolute inset-0 z-10">
-          {/* Top-left: sale badge, then the headline marketing tag. */}
+          {/* Top-left: the headline marketing tag, with the sale badge under
+              it. `dir="ltr"` pins both to the physical left edge — the column
+              is anchored there, but its cross-axis start would otherwise flip
+              to the right in RTL. The column carries the width cap so the
+              badge's `max-w-full` resolves against a definite width rather
+              than a shrink-to-fit box. */}
           {(product.badge || topTag) && (
             <div
-              className={`absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5 ${BADGE_SLOT}`}
+              dir="ltr"
+              className={`absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5 ${BADGE_CAP}`}
             >
+              {topTag && (
+                <TagBadge
+                  src={tagBadgeSrc(topTag, locale)}
+                  label={tt(TAG_BADGES[topTag].key)}
+                  className={`${CARD_BADGE} max-w-full`}
+                />
+              )}
               {product.badge && (
                 <span className="rounded bg-discount px-2 py-0.5 text-[10px] font-bold uppercase text-white">
                   {product.badge}
                 </span>
-              )}
-              {topTag && (
-                <TagBadge
-                  src={TAG_BADGES[topTag].src}
-                  label={tt(TAG_BADGES[topTag].key)}
-                  className={CARD_BADGE}
-                />
               )}
             </div>
           )}
 
           {/* Bottom-left: the Saudi-Made provenance seal. */}
           {hasSaudiMade && (
-            <div className={`absolute bottom-2.5 left-2.5 ${BADGE_SLOT}`}>
-              <TagBadge
-                src={TAG_BADGES.SAUDI_MADE.src}
-                label={tt(TAG_BADGES.SAUDI_MADE.key)}
-                className={CARD_BADGE}
-              />
-            </div>
+            <TagBadge
+              src={tagBadgeSrc("SAUDI_MADE", locale)}
+              label={tt(TAG_BADGES.SAUDI_MADE.key)}
+              className={`absolute bottom-2.5 left-2.5 ${CARD_BADGE} ${BADGE_CAP}`}
+            />
           )}
 
-          {/* Bottom-right: overflow marketing tag, kept opposite the seal. */}
+          {/* Bottom-right: overflow marketing tag (only products carrying both
+              marketing tags reach here), kept opposite the seal. Hidden on the
+              two-column phone grid, where it would crowd the seal. */}
           {bottomEndTag && (
-            <div className={`absolute bottom-2.5 right-2.5 ${BADGE_SLOT}`}>
-              <TagBadge
-                src={TAG_BADGES[bottomEndTag].src}
-                label={tt(TAG_BADGES[bottomEndTag].key)}
-                className={CARD_BADGE}
-              />
-            </div>
+            <TagBadge
+              src={tagBadgeSrc(bottomEndTag, locale)}
+              label={tt(TAG_BADGES[bottomEndTag].key)}
+              className={`absolute bottom-2.5 right-2.5 hidden sm:block ${CARD_BADGE} ${BADGE_CAP}`}
+            />
           )}
         </div>
 

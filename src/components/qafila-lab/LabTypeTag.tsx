@@ -1,17 +1,21 @@
 import type { StaticImageData } from "next/image";
 import TagBadge from "@/components/shared/TagBadge";
-import designerBadge from "../../../public/images/tags/brand-designer.png";
-import manufacturerBadge from "../../../public/images/tags/brand-manufacturer.png";
+import designerEn from "../../../public/images/tags/brand-designer.png";
+import designerAr from "../../../public/images/tags/brand-designer-ar.png";
+import manufacturerEn from "../../../public/images/tags/brand-manufacturer.png";
+import manufacturerAr from "../../../public/images/tags/brand-manufacturer-ar.png";
 
 export type QafilaLabType = "DESIGNER" | "MANUFACTURER";
 
-/** Ready-made badge artwork per specialization — background, rounded corners
- * and internal padding are baked into the PNG, so the badge is only sized.
- * Both share one 1160×240 canvas with identical padding, so the two render at
- * exactly the same size. */
-const BADGES: Record<QafilaLabType, StaticImageData> = {
-  DESIGNER: designerBadge,
-  MANUFACTURER: manufacturerBadge,
+/** Ready-made badge artwork per specialization and locale — background,
+ * rounded corners and internal padding are baked into the PNG, and every badge
+ * is drawn to a common height, so the badge only ever needs a height in CSS. */
+const BADGES: Record<
+  QafilaLabType,
+  { en: StaticImageData; ar: StaticImageData }
+> = {
+  DESIGNER: { en: designerEn, ar: designerAr },
+  MANUFACTURER: { en: manufacturerEn, ar: manufacturerAr },
 };
 
 interface LabTypeTagProps {
@@ -19,6 +23,8 @@ interface LabTypeTagProps {
   type?: QafilaLabType | null;
   /** Localized label for the type (e.g. "Brand Designer"). */
   label: string;
+  /** Active locale — selects the Arabic or English artwork. */
+  locale: string;
   /** Sizing utilities for the badge. */
   className?: string;
 }
@@ -31,13 +37,14 @@ interface LabTypeTagProps {
 export default function LabTypeTag({
   type,
   label,
+  locale,
   className = "h-7 w-auto",
 }: LabTypeTagProps) {
   if (!type) return null;
 
   return (
     <TagBadge
-      src={BADGES[type]}
+      src={BADGES[type][locale === "ar" ? "ar" : "en"]}
       label={label}
       className={`max-w-full ${className}`}
     />

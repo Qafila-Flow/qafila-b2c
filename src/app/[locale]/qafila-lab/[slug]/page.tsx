@@ -160,6 +160,7 @@ export default async function QafilaLabVendorPage({
                 <div className="mb-3">
                   <LabTypeTag
                     type={vendor.qafilaLabType}
+                    locale={locale}
                     label={
                       vendor.qafilaLabType === "DESIGNER"
                         ? t("designer")
