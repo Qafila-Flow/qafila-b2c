@@ -1,11 +1,14 @@
+import type { StaticImageData } from "next/image";
 import type { ProductTag } from "@/lib/api/products";
+import limitedEditionsBadge from "../../public/images/tags/limited-editions.png";
+import luxuriesBadge from "../../public/images/tags/luxuries.png";
+import saudiMadeBadge from "../../public/images/tags/saudi-made.png";
 
-export interface TagBadge {
-  /** Public path to the badge artwork (self-contained pill, rounded corners baked in). */
-  src: string;
-  /** Intrinsic pixel size of the artwork — used for next/image ratio + sizing. */
-  width: number;
-  height: number;
+export interface TagBadgeAsset {
+  /** Badge artwork — a self-contained pill, rounded corners baked in.
+   * Statically imported so the URL carries a content hash: re-exported
+   * artwork can never be shadowed by a cached copy of the old file. */
+  src: StaticImageData;
   /** i18n key under `productTag.<key>` — used for alt text / tooltips. */
   key: "limitedEditions" | "luxuries" | "saudiMade";
 }
@@ -15,27 +18,12 @@ export interface TagBadge {
  * normalized to one shared 940×240 canvas with identical internal padding, so
  * all three badges render at exactly the same size. It already carries its own
  * background and rounded corners — never wrap it in a pill, border or extra
- * background, only size it (fixed height, auto width) and space it.
+ * background, only size it and space it.
  */
-export const TAG_BADGES: Record<ProductTag, TagBadge> = {
-  LIMITED_EDITIONS: {
-    src: "/images/tags/limited-editions.png",
-    width: 940,
-    height: 240,
-    key: "limitedEditions",
-  },
-  LUXURIES: {
-    src: "/images/tags/luxuries.png",
-    width: 940,
-    height: 240,
-    key: "luxuries",
-  },
-  SAUDI_MADE: {
-    src: "/images/tags/saudi-made.png",
-    width: 940,
-    height: 240,
-    key: "saudiMade",
-  },
+export const TAG_BADGES: Record<ProductTag, TagBadgeAsset> = {
+  LIMITED_EDITIONS: { src: limitedEditionsBadge, key: "limitedEditions" },
+  LUXURIES: { src: luxuriesBadge, key: "luxuries" },
+  SAUDI_MADE: { src: saudiMadeBadge, key: "saudiMade" },
 };
 
 /** Display priority — highest first. Drives the order badges are listed in. */

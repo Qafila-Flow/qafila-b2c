@@ -28,8 +28,6 @@ export default function ProductTags({
           <TagBadge
             key={tg}
             src={badge.src}
-            width={badge.width}
-            height={badge.height}
             label={tt(badge.key)}
             className="h-8 w-auto shrink-0 sm:h-9"
           />

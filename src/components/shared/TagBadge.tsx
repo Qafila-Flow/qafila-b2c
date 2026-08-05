@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 
 /**
  * Renders a ready-made badge image (product tags, Qafila Lab types).
@@ -8,17 +8,17 @@ import Image from "next/image";
  * caller owns sizing through `className` (e.g. `h-7 w-auto`, or `w-full
  * h-auto` to size off the container). Never wrap it in a border, background
  * or extra pill.
+ *
+ * `src` is a static import, so its intrinsic size comes along for free and the
+ * emitted URL is content-hashed and immutable — updated artwork can never be
+ * served from a stale image-optimizer or browser cache.
  */
 export default function TagBadge({
   src,
-  width,
-  height,
   label,
   className = "h-7 w-auto",
 }: {
-  src: string;
-  width: number;
-  height: number;
+  src: StaticImageData;
   /** Localized name — used as alt text and hover tooltip. */
   label: string;
   /** Sizing utilities (plus any extra classes) — the caller sets both axes,
@@ -30,8 +30,6 @@ export default function TagBadge({
       src={src}
       alt={label}
       title={label}
-      width={width}
-      height={height}
       className={`object-contain ${className}`}
     />
   );

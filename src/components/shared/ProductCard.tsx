@@ -102,8 +102,6 @@ export default function ProductCard({
               {topTag && (
                 <TagBadge
                   src={TAG_BADGES[topTag].src}
-                  width={TAG_BADGES[topTag].width}
-                  height={TAG_BADGES[topTag].height}
                   label={tt(TAG_BADGES[topTag].key)}
                   className={CARD_BADGE}
                 />
@@ -116,8 +114,6 @@ export default function ProductCard({
             <div className={`absolute bottom-2.5 left-2.5 ${BADGE_SLOT}`}>
               <TagBadge
                 src={TAG_BADGES.SAUDI_MADE.src}
-                width={TAG_BADGES.SAUDI_MADE.width}
-                height={TAG_BADGES.SAUDI_MADE.height}
                 label={tt(TAG_BADGES.SAUDI_MADE.key)}
                 className={CARD_BADGE}
               />
@@ -129,8 +125,6 @@ export default function ProductCard({
             <div className={`absolute bottom-2.5 right-2.5 ${BADGE_SLOT}`}>
               <TagBadge
                 src={TAG_BADGES[bottomEndTag].src}
-                width={TAG_BADGES[bottomEndTag].width}
-                height={TAG_BADGES[bottomEndTag].height}
                 label={tt(TAG_BADGES[bottomEndTag].key)}
                 className={CARD_BADGE}
               />

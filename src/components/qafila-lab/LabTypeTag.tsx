@@ -1,4 +1,7 @@
+import type { StaticImageData } from "next/image";
 import TagBadge from "@/components/shared/TagBadge";
+import designerBadge from "../../../public/images/tags/brand-designer.png";
+import manufacturerBadge from "../../../public/images/tags/brand-manufacturer.png";
 
 export type QafilaLabType = "DESIGNER" | "MANUFACTURER";
 
@@ -6,10 +9,9 @@ export type QafilaLabType = "DESIGNER" | "MANUFACTURER";
  * and internal padding are baked into the PNG, so the badge is only sized.
  * Both share one 1160×240 canvas with identical padding, so the two render at
  * exactly the same size. */
-const BADGE_SIZE = { width: 1160, height: 240 };
-const BADGE_SRC: Record<QafilaLabType, string> = {
-  DESIGNER: "/images/tags/brand-designer.png",
-  MANUFACTURER: "/images/tags/brand-manufacturer.png",
+const BADGES: Record<QafilaLabType, StaticImageData> = {
+  DESIGNER: designerBadge,
+  MANUFACTURER: manufacturerBadge,
 };
 
 interface LabTypeTagProps {
@@ -17,7 +19,7 @@ interface LabTypeTagProps {
   type?: QafilaLabType | null;
   /** Localized label for the type (e.g. "Brand Designer"). */
   label: string;
-  /** Height utility for the badge (width follows automatically). */
+  /** Sizing utilities for the badge. */
   className?: string;
 }
 
@@ -35,9 +37,7 @@ export default function LabTypeTag({
 
   return (
     <TagBadge
-      src={BADGE_SRC[type]}
-      width={BADGE_SIZE.width}
-      height={BADGE_SIZE.height}
+      src={BADGES[type]}
       label={label}
       className={`max-w-full ${className}`}
     />
