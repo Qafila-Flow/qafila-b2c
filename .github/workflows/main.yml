@@ -21,19 +21,29 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            cd /var/www/qafila-b2c
-            git pull
-            export PNPM_HOME="$HOME/.local/share/pnpm"
-            export PATH="$PNPM_HOME:$PATH"
-            if ! command -v pnpm >/dev/null 2>&1; then
-              if command -v corepack >/dev/null 2>&1; then
-                corepack enable
-                corepack prepare pnpm@latest --activate
-              else
-                curl -fsSL https://get.pnpm.io/install.sh | sh -
-              fi
-              export PATH="$PNPM_HOME:$PATH"
+            # Load NVM
+            export NVM_DIR="$HOME/.nvm"
+
+            if [ -s "$NVM_DIR/nvm.sh" ]; then
+              source "$NVM_DIR/nvm.sh"
+            else
+              echo "ERROR: NVM is not installed at $NVM_DIR"
+              exit 1
             fi
+
+            # Load pnpm
+            export PNPM_HOME="$HOME/.local/share/pnpm"
+            export PATH="$PNPM_HOME/bin:$PATH"
+
+            cd /var/www/qafila-b2c
+
+            git pull
+
+            echo "Node: $(node --version)"
+            echo "npm: $(npm --version)"
+            echo "pnpm: $(pnpm --version)"
+            echo "pm2: $(pm2 --version)"
+
             pnpm install --frozen-lockfile
             pnpm build
             pm2 restart b2c
