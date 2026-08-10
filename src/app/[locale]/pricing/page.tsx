@@ -42,8 +42,8 @@ const SEGMENT_CONFIG: Record<PlanSegment, { label: string; labelAr: string }> =
 // Only INDIVIDUAL plans can be subscribed to on the customer storefront. All
 // other segments (Business / Government / Vendor) are display-only and their CTA
 // sends the user to the B2B portal to subscribe there.
-const B2B_PORTAL_URL = "https://qafila-b2b.bits3.com";
-const B2G_PORTAL_URL = "https://b2g.bits3.com";
+const B2B_PORTAL_URL = "https://business.qafila.com.sa";
+const B2G_PORTAL_URL = "https://government.qafila.com.sa";
 
 // Government plans link out to the B2G portal; all other external segments
 // (Business / Vendor) link to the B2B portal.
@@ -502,8 +502,7 @@ export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">(
     "monthly",
   );
-  const [activeSegment, setActiveSegment] =
-    useState<PlanSegment>("INDIVIDUAL");
+  const [activeSegment, setActiveSegment] = useState<PlanSegment>("INDIVIDUAL");
   const [subscribingPlan, setSubscribingPlan] =
     useState<SubscriptionPlan | null>(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);

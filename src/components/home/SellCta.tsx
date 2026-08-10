@@ -7,7 +7,7 @@ export default async function SellCta() {
     <section className="w-full bg-primary py-3.5">
       <div className="mx-auto max-w-360 text-center">
         <a
-          href="https://qafila-b2b.bits3.com"
+          href="https://business.qafila.com.sa"
           className="inline-flex items-center gap-2 text-base font-bold text-white transition-opacity hover:opacity-90"
         >
           {t("text")}

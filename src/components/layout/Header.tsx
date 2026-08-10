@@ -34,7 +34,7 @@ import { useSubscription } from "@/lib/subscription-context";
 // Vendor application form lives in a separate app (qafila-form). Set the
 // deployed URL via NEXT_PUBLIC_SELLER_URL; falls back to the local dev port.
 const SELLER_URL =
-  process.env.NEXT_PUBLIC_SELLER_URL || "https://qafila-b2b.bits3.com";
+  process.env.NEXT_PUBLIC_SELLER_URL || "https://business.qafila.com.sa";
 
 interface HeaderProps {
   categoryTree?: Category[];
@@ -423,7 +423,7 @@ export default function Header({ categoryTree = [] }: HeaderProps) {
                         </div>
                         <div className="px-3 pb-2">
                           <a
-                            href={"https://qafila-b2b.bits3.com"}
+                            href={"https://business.qafila.com.sa"}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setLoginDropdownOpen(false)}
