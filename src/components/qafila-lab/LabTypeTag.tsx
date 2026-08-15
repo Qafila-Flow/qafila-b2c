@@ -4,8 +4,10 @@ import designerEn from "../../../public/images/tags/brand-designer.png";
 import designerAr from "../../../public/images/tags/brand-designer-ar.png";
 import manufacturerEn from "../../../public/images/tags/brand-manufacturer.png";
 import manufacturerAr from "../../../public/images/tags/brand-manufacturer-ar.png";
+import ambassadorEn from "../../../public/images/tags/brand-ambassador.png";
+import ambassadorAr from "../../../public/images/tags/brand-ambassador-ar.png";
 
-export type QafilaLabType = "DESIGNER" | "MANUFACTURER";
+export type QafilaLabType = "DESIGNER" | "MANUFACTURER" | "AMBASSADOR";
 
 /** Ready-made badge artwork per specialization and locale — background,
  * rounded corners and internal padding are baked into the PNG, and every badge
@@ -16,6 +18,15 @@ const BADGES: Record<
 > = {
   DESIGNER: { en: designerEn, ar: designerAr },
   MANUFACTURER: { en: manufacturerEn, ar: manufacturerAr },
+  AMBASSADOR: { en: ambassadorEn, ar: ambassadorAr },
+};
+
+/** Key into the `qafilaLab` message namespace for each specialization, so the
+ * call sites resolve the label with a lookup instead of a chain of ternaries. */
+export const LAB_TYPE_LABEL_KEY: Record<QafilaLabType, string> = {
+  DESIGNER: "designer",
+  MANUFACTURER: "manufacturer",
+  AMBASSADOR: "ambassador",
 };
 
 interface LabTypeTagProps {

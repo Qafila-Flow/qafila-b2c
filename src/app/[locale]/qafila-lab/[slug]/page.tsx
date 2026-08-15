@@ -7,7 +7,7 @@ import { getProducts } from "@/lib/api/products";
 import type { ApiProduct } from "@/lib/api/products";
 import { getMediaUrl } from "@/lib/utils";
 import ProductCard, { type Product } from "@/components/shared/ProductCard";
-import LabTypeTag from "@/components/qafila-lab/LabTypeTag";
+import LabTypeTag, { LAB_TYPE_LABEL_KEY } from "@/components/qafila-lab/LabTypeTag";
 
 function mapApiProduct(item: ApiProduct, locale: string): Product {
   const price = Number(item.price);
@@ -161,11 +161,7 @@ export default async function QafilaLabVendorPage({
                   <LabTypeTag
                     type={vendor.qafilaLabType}
                     locale={locale}
-                    label={
-                      vendor.qafilaLabType === "DESIGNER"
-                        ? t("designer")
-                        : t("manufacturer")
-                    }
+                    label={t(LAB_TYPE_LABEL_KEY[vendor.qafilaLabType])}
                     className="h-8 w-auto sm:h-9"
                   />
                 </div>
