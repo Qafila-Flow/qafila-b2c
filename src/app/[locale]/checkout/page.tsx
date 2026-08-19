@@ -14,18 +14,16 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { getAddresses, type Address } from "@/lib/api/addresses";
-import { checkout, mockPayment } from "@/lib/api/orders";
-import type { OrderResponse } from "@/types/order";
+import { checkout } from "@/lib/api/orders";
 import Image from "next/image";
 import { getMediaUrl } from "@/lib/utils";
 import SarIcon from "@/components/shared/SarIcon";
-import OrderConfirmation from "@/components/orders/OrderConfirmation";
 
 export default function CheckoutPage() {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
-  const { items, summary, refreshCart } = useCart();
+  const { items, summary } = useCart();
   const { isLoggedIn } = useAuth();
 
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -34,7 +32,6 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [addressLoading, setAddressLoading] = useState(true);
   const [error, setError] = useState("");
-  const [order, setOrder] = useState<OrderResponse | null>(null);
 
   // Fetch addresses
   useEffect(() => {
@@ -72,7 +69,7 @@ export default function CheckoutPage() {
   }
 
   // Empty cart
-  if (items.length === 0 && !order) {
+  if (items.length === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 py-16">
         {/* Same asset as the empty state on the cart page. */}
@@ -97,34 +94,32 @@ export default function CheckoutPage() {
     );
   }
 
-  // Order success — full confirmation: every shipment, where it's going, and
-  // the invoice, without making the customer go hunting in order history.
-  if (order) {
-    return <OrderConfirmation order={order} />;
-  }
-
+  /**
+   * Create the order, then hand off to the card step.
+   *
+   * The order is created here and stays PENDING until money actually arrives,
+   * so a declined card, a closed tab or a back button never loses it — the
+   * customer returns to /checkout/payment for the same order rather than
+   * rebuilding a cart. The cart is emptied server-side when the payment
+   * settles, not here.
+   */
   const handlePlaceOrder = async () => {
     if (!selectedAddressId) return;
     setLoading(true);
     setError("");
 
     try {
-      // Step 1: Create order
       const createdOrder = await checkout({
         addressId: selectedAddressId,
         notes: notes || undefined,
+        idempotencyKey: crypto.randomUUID(),
       });
 
-      // Step 2: Mock payment
-      const paidOrder = await mockPayment(createdOrder.id, { success: true });
-
-      setOrder(paidOrder);
-      await refreshCart();
+      router.push(`/checkout/payment?orderId=${createdOrder.id}`);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t("checkout.paymentFailed"),
       );
-    } finally {
       setLoading(false);
     }
   };
@@ -248,9 +243,12 @@ export default function CheckoutPage() {
                   className="accent-primary"
                 />
                 <span className="text-sm font-medium text-dark dark:text-gray-100">
-                  {t("checkout.mockPayment")}
+                  {t("checkout.cardPayment")}
                 </span>
               </div>
+              <p className="mt-2 text-xs text-gray-text">
+                {t("checkout.cardPaymentNote")}
+              </p>
             </div>
           </div>
         </div>
@@ -326,7 +324,7 @@ export default function CheckoutPage() {
               disabled={loading || !selectedAddressId}
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:opacity-50"
             >
-              {loading ? t("checkout.placing") : t("checkout.placeOrder")}
+              {loading ? t("checkout.placing") : t("checkout.continueToPayment")}
               {!loading && <ChevronRight size={16} />}
             </button>
           </div>

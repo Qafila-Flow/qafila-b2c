@@ -1,20 +1,9 @@
 import apiClient from "./client";
-import type {
-  CheckoutDto,
-  MockPaymentDto,
-  OrderResponse,
-} from "@/types/order";
+import type { CheckoutDto, OrderResponse } from "@/types/order";
 
 
 export async function checkout(dto: CheckoutDto): Promise<OrderResponse> {
   return apiClient.post("/orders/checkout", dto);
-}
-
-export async function mockPayment(
-  orderId: string,
-  dto: MockPaymentDto,
-): Promise<OrderResponse> {
-  return apiClient.post(`/orders/${orderId}/mock-payment`, dto);
 }
 
 export interface OrdersListResponse {

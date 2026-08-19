@@ -11,6 +11,7 @@ import OrderItemsList from "@/components/orders/OrderItemsList";
 import CancelItemsView from "@/components/orders/CancelItemsView";
 import {
   ArrowLeft,
+  CreditCard,
   MapPin,
   RefreshCw,
   ChevronRight,
@@ -209,6 +210,23 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </div>
+
+          {/*
+            An unpaid order is not a dead end. Checkout deliberately leaves the
+            order PENDING when a card is declined or the customer closes the
+            tab mid-3DS, so this is the way back to it — without it, "you can
+            try again with another card" is only true if the customer never
+            navigates away.
+          */}
+          {order.status === "PENDING" && order.paymentStatus !== "PAID" && (
+            <Link
+              href={`/checkout/payment?orderId=${order.id}`}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+            >
+              <CreditCard size={16} />
+              {t("completePayment")}
+            </Link>
+          )}
 
           {/* Invoice — available for the life of the order, not just at checkout */}
           {order.paymentStatus === "PAID" && (

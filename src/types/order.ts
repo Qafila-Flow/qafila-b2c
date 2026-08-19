@@ -8,7 +8,12 @@ export type OrderStatus =
   | "CANCELLED"
   | "REFUNDED";
 
-export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
+export type PaymentStatus =
+  | "PENDING"
+  | "PAID"
+  | "FAILED"
+  | "REFUNDED"
+  | "PARTIALLY_REFUNDED";
 
 export type CancellationReason =
   | "CHANGED_MIND"
@@ -21,10 +26,6 @@ export interface CheckoutDto {
   addressId: string;
   notes?: string;
   idempotencyKey?: string;
-}
-
-export interface MockPaymentDto {
-  success: boolean;
 }
 
 export interface OrderItemResponse {

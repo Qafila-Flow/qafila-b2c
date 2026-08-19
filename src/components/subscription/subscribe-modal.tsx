@@ -1,37 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { X, CreditCard, Lock, CheckCircle2, AlertCircle } from "lucide-react";
+import { X, Lock, CheckCircle2, AlertCircle } from "lucide-react";
 import SarIcon from "@/components/shared/SarIcon";
 import { subscribe, changePlan } from "@/lib/api/subscriptions";
 import { useSubscription } from "@/lib/subscription-context";
 import type { SubscriptionPlan } from "@/lib/api/plans";
 import type { BillingCycle } from "@/lib/api/subscriptions";
 import { useLocale } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 
 interface SubscribeModalProps {
   plan: SubscriptionPlan | null;
   defaultBillingCycle?: "monthly" | "annually";
   onClose: () => void;
-}
-
-// ── Tiny helpers ──────────────────────────────────────────────────────────────
-function formatCard(raw: string): string {
-  return raw
-    .replace(/\D/g, "")
-    .slice(0, 16)
-    .replace(/(.{4})/g, "$1 ")
-    .trim();
-}
-
-function formatExpiry(raw: string): string {
-  const digits = raw.replace(/\D/g, "").slice(0, 4);
-  if (digits.length >= 3) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  return digits;
-}
-
-function formatCvv(raw: string): string {
-  return raw.replace(/\D/g, "").slice(0, 4);
 }
 
 type Step = "form" | "processing" | "success" | "error";
@@ -42,15 +24,12 @@ export function SubscribeModal({
   onClose,
 }: SubscribeModalProps) {
   const locale = useLocale();
+  const router = useRouter();
   const { subscription, refreshSubscription } = useSubscription();
 
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">(
     defaultBillingCycle,
   );
-  const [cardNumber, setCardNumber] = useState("4242 4242 4242 4242");
-  const [expiry, setExpiry] = useState("12/28");
-  const [cvv, setCvv] = useState("123");
-  const [name, setName] = useState("");
   const [step, setStep] = useState<Step>("form");
   const [errorMsg, setErrorMsg] = useState("");
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -80,11 +59,18 @@ export function SubscribeModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // A paid plan is switched on by the payment settling, not by this request.
+    // Hand off to the card step; the plan activates when the money lands.
+    if (!isFree) {
+      const cycle = billingCycle === "annually" ? "ANNUALLY" : "MONTHLY";
+      router.push(`/checkout/payment?planId=${plan.id}&cycle=${cycle}`);
+      onClose();
+      return;
+    }
+
     setStep("processing");
     setErrorMsg("");
-
-    // Simulate a brief payment processing delay
-    await new Promise((r) => setTimeout(r, 1500));
 
     try {
       const backendCycle: BillingCycle = isFree
@@ -169,7 +155,7 @@ export function SubscribeModal({
           <div className="flex flex-col items-center gap-4 px-8 py-12 text-center">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-primary" />
             <p className="text-sm font-medium text-gray-text">
-              Processing payment…
+              Activating your subscription…
             </p>
           </div>
         )}
@@ -253,88 +239,21 @@ export function SubscribeModal({
                 )}
               </div>
 
-              {/* Mock payment form — only for paid plans */}
+              {/*
+                Card entry deliberately lives with the payment provider, not
+                here. Hand-rolled card inputs are how a real PAN ends up in
+                component state, an error report or a form autofill — the
+                storefront's card flow (see components/payments/MoyasarForm)
+                keeps that data off Qafila entirely, and subscriptions will use
+                the same form once the backend supports charging for them.
+              */}
               {!isFree && (
-                <div className="space-y-4">
-                  {/* Test mode banner */}
-                  <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20 px-3 py-2">
-                    <span className="rounded bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      TEST
-                    </span>
-                    <p className="text-xs text-amber-700 dark:text-amber-400">
-                      Use card <span className="font-mono font-semibold">4242 4242 4242 4242</span> for testing
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 mb-1">
-                    <CreditCard size={14} className="text-gray-text" />
-                    <span className="text-xs font-semibold text-dark dark:text-gray-100 uppercase tracking-wide">
-                      Payment Details
-                    </span>
-                  </div>
-
-                  {/* Card number */}
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-text">
-                      Card Number
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={cardNumber}
-                      onChange={(e) => setCardNumber(formatCard(e.target.value))}
-                      placeholder="1234 5678 9012 3456"
-                      required
-                      className="w-full rounded-xl border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm font-mono text-dark dark:text-gray-100 outline-none focus:border-primary transition-colors"
-                    />
-                  </div>
-
-                  {/* Expiry + CVV */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-text">
-                        Expiry
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={expiry}
-                        onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-                        placeholder="MM/YY"
-                        required
-                        className="w-full rounded-xl border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm font-mono text-dark dark:text-gray-100 outline-none focus:border-primary transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-xs font-medium text-gray-text">
-                        CVV
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={cvv}
-                        onChange={(e) => setCvv(formatCvv(e.target.value))}
-                        placeholder="123"
-                        required
-                        className="w-full rounded-xl border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm font-mono text-dark dark:text-gray-100 outline-none focus:border-primary transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Cardholder name */}
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-text">
-                      Cardholder Name
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Name on card"
-                      required
-                      className="w-full rounded-xl border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm text-dark dark:text-gray-100 outline-none focus:border-primary transition-colors"
-                    />
-                  </div>
+                <div className="flex items-start gap-2 rounded-lg border border-gray-border dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40 px-3 py-2.5">
+                  <Lock size={14} className="mt-0.5 shrink-0 text-gray-text" />
+                  <p className="text-xs text-gray-text">
+                    Card details are entered securely on the next step, with our
+                    payment provider — never on this screen.
+                  </p>
                 </div>
               )}
 
@@ -344,18 +263,9 @@ export function SubscribeModal({
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
               >
                 <Lock size={14} />
-                {isFree
-                  ? "Start for Free"
-                  : `Pay ${plan.currency} ${price?.toLocaleString()}`}
+                {isFree ? "Start for Free" : "Continue to payment"}
               </button>
 
-              {/* Security note */}
-              {!isFree && (
-                <p className="text-center text-[11px] text-gray-text">
-                  <Lock size={10} className="inline me-1" />
-                  Payments are encrypted and secure
-                </p>
-              )}
             </form>
           </>
         )}

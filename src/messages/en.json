@@ -476,7 +476,6 @@
     "orderNotes": "Order Notes (optional)",
     "notesPlaceholder": "Special instructions for delivery...",
     "paymentMethod": "Payment Method",
-    "mockPayment": "Test Payment (Development)",
     "placeOrder": "Place Order",
     "placing": "Placing Order...",
     "orderSummary": "Order Summary",
@@ -494,7 +493,34 @@
     "yourShipments": "Your shipments",
     "shipmentOf": "Shipment {index} of {total}",
     "paid": "Paid",
-    "itemsLabel": "Items"
+    "itemsLabel": "Items",
+    "cardPayment": "Credit or debit card (mada, Visa, Mastercard)",
+    "cardPaymentNote": "You will enter your card details securely on the next step.",
+    "continueToPayment": "Continue to payment"
+  },
+  "payment": {
+    "title": "Payment",
+    "subtitle": "Your card details are handled by our payment provider.",
+    "amountDue": "Amount due",
+    "securityNote": "Card details are entered directly with our payment provider and never reach Qafila servers.",
+    "threeDsNote": "Your bank may ask you to confirm this payment before it is completed.",
+    "confirming": "Confirming your payment…",
+    "missingOrder": "No order was specified for this payment.",
+    "missingPayment": "No payment was specified.",
+    "initFailed": "We could not start the payment. Please try again.",
+    "tryAgain": "Try again",
+    "tryAnotherCard": "Try another card",
+    "backToCart": "Back to cart",
+    "failedTitle": "Payment not completed",
+    "failedBody": "Your card was not charged. Your order is saved, so you can try again with another card.",
+    "stillProcessingTitle": "Still confirming your payment",
+    "stillProcessingBody": "Your bank has not confirmed the payment yet. This usually takes a few seconds. You can check again, or find the order in your account shortly.",
+    "checkAgain": "Check again",
+    "paidNoOrderView": "Your payment went through. You can see the full order in your account.",
+    "paymentFor": "Payment for",
+    "subscriptionActiveTitle": "Your subscription is active",
+    "subscriptionActiveBody": "Payment received. All the features of your plan are available right away.",
+    "viewSubscription": "View my subscription"
   },
   "orders": {
     "title": "Orders & Returns",
@@ -561,7 +587,8 @@
       "CANCELLED": "Your order has been cancelled",
       "REFUNDED": "Your payment has been refunded"
     },
-    "back": "Back"
+    "back": "Back",
+    "completePayment": "Complete payment"
   },
   "invoice": {
     "title": "Invoice",
