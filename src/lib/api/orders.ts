@@ -18,9 +18,24 @@ export async function getMyOrders(params?: {
   page?: number;
   limit?: number;
   status?: string;
+  /**
+   * Several statuses in ONE request.
+   *
+   * The "active" tab spans five of them. It used to fire five parallel
+   * requests and stitch the pages together client-side, which meant
+   * pagination silently broke as soon as a customer had more than one page of
+   * any single status.
+   */
+  statuses?: string[];
   paymentStatus?: string;
 }): Promise<OrdersListResponse> {
-  return apiClient.get("/orders", { params });
+  const { statuses, ...rest } = params ?? {};
+  return apiClient.get("/orders", {
+    params: {
+      ...rest,
+      ...(statuses?.length ? { statuses: statuses.join(",") } : {}),
+    },
+  });
 }
 
 export async function getOrder(orderId: string): Promise<OrderResponse> {

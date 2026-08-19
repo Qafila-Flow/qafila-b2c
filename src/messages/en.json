@@ -588,7 +588,19 @@
       "REFUNDED": "Your payment has been refunded"
     },
     "back": "Back",
-    "completePayment": "Complete payment"
+    "completePayment": "Complete payment",
+    "shipmentsTitle": "{count} shipments",
+    "shipmentOf": "Shipment {index} of {total}",
+    "shipmentsDelivered": "{delivered} of {total} delivered",
+    "shipmentFallbackStore": "Seller",
+    "shipmentTooLate": "Already {status}",
+    "nothingCancellable": "Nothing on this order can still be cancelled — every shipment has already been packed or sent.",
+    "cancelFailed": "That item could not be cancelled. Its shipment may have moved on — refresh and try again.",
+    "refundInProgress": "A refund for the cancelled items is on its way back to your original payment method. The totals above show what was originally charged.",
+    "trackingNumber": "Tracking",
+    "refresh": "Refresh",
+    "previous": "Previous",
+    "next": "Next"
   },
   "invoice": {
     "title": "Invoice",

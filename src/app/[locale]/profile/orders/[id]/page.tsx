@@ -5,20 +5,16 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getOrder } from "@/lib/api/orders";
-import type { OrderResponse, OrderStatus } from "@/types/order";
-import OrderStatusTimeline from "@/components/orders/OrderStatusTimeline";
-import OrderItemsList from "@/components/orders/OrderItemsList";
+import type { OrderResponse } from "@/types/order";
+import ShipmentCard from "@/components/orders/ShipmentCard";
 import CancelItemsView from "@/components/orders/CancelItemsView";
-import {
-  ArrowLeft,
-  CreditCard,
-  MapPin,
-  RefreshCw,
-  ChevronRight,
-} from "lucide-react";
-import Image from "next/image";
+import { ArrowLeft, CreditCard, MapPin, RefreshCw, Package } from "lucide-react";
 import SarIcon from "@/components/shared/SarIcon";
 import DownloadInvoiceButton from "@/components/orders/DownloadInvoiceButton";
+import {
+  deliveryProgress,
+  hasCancellableShipment,
+} from "@/lib/order-status";
 
 export default function OrderDetailPage() {
   const t = useTranslations("orders");
@@ -62,12 +58,26 @@ export default function OrderDetailPage() {
     );
   }
 
-  const canCancel = ["PENDING", "PLACED", "CONFIRMED"].includes(order.status);
-  const allItems = order.vendorOrders.flatMap((vo) => vo.items);
-  const activeItems = allItems.filter((i) => i.status === "ACTIVE");
-  const itemCount = allItems.reduce((s, i) => s + i.quantity, 0);
+  const shipments = order.vendorOrders;
 
-  // Cancel view
+  /**
+   * Cancellation is decided per shipment, never from `order.status`.
+   *
+   * `order.status` is a rollup, and it used to be a frozen one — reading it
+   * here is what let a customer cancel an order every vendor had already
+   * delivered. The button appears only if at least one parcel is still early
+   * enough to stop.
+   */
+  const canCancel = hasCancellableShipment(shipments);
+  const activeItems = shipments
+    .flatMap((s) => s.items)
+    .filter((i) => i.status === "ACTIVE");
+  const itemCount = shipments
+    .flatMap((s) => s.items)
+    .reduce((sum, i) => sum + i.quantity, 0);
+
+  const progress = deliveryProgress(shipments);
+
   if (view === "cancel") {
     return (
       <CancelItemsView
@@ -96,36 +106,54 @@ export default function OrderDetailPage() {
       </button>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Left column */}
-        <div className="space-y-6">
-          {/* Order Status Timeline */}
-          <div className="rounded-xl border border-gray-border dark:border-gray-700 bg-white dark:bg-dark p-6">
-            <h2 className="mb-5 text-base font-bold text-dark dark:text-gray-100">
-              {t("orderStatus")}
+        {/* ── Left: the caravan ──────────────────────────────────────────── */}
+        <div className="space-y-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-base font-bold text-dark dark:text-gray-100">
+              {shipments.length > 1
+                ? t("shipmentsTitle", { count: shipments.length })
+                : t("orderStatus")}
             </h2>
-            <OrderStatusTimeline status={order.status} createdAt={order.createdAt} />
+            {/* Only worth saying when there is more than one parcel in play. */}
+            {shipments.length > 1 && progress.live > 0 && (
+              <span className="text-xs text-gray-text">
+                {t("shipmentsDelivered", {
+                  delivered: progress.delivered,
+                  total: progress.live,
+                })}
+              </span>
+            )}
           </div>
 
-          {/* Items Summary */}
-          <div className="rounded-xl border border-gray-border dark:border-gray-700 bg-white dark:bg-dark p-6">
-            <h2 className="mb-4 text-base font-bold text-dark dark:text-gray-100">
-              {t("itemsSummary")} ({itemCount}{" "}
-              {itemCount > 1 ? t("items", { count: itemCount }) : t("item", { count: itemCount })})
-            </h2>
-            <OrderItemsList items={allItems} locale={locale} />
-          </div>
+          {shipments.map((shipment, i) => (
+            <ShipmentCard
+              key={shipment.id}
+              shipment={shipment}
+              index={i + 1}
+              total={shipments.length}
+            />
+          ))}
         </div>
 
-        {/* Right column */}
+        {/* ── Right: the order itself ────────────────────────────────────── */}
         <div className="space-y-6">
           {/* Order ID + reload */}
           <div className="flex items-center justify-between rounded-xl border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-6 py-4">
-            <span className="text-sm font-semibold text-dark dark:text-gray-200">
-              {t("orderNumber")} #{shortId}
-            </span>
+            <div>
+              <span className="text-sm font-semibold text-dark dark:text-gray-200">
+                {t("orderNumber")} #{shortId}
+              </span>
+              <p className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-text">
+                <Package size={12} />
+                {itemCount > 1
+                  ? t("items", { count: itemCount })
+                  : t("item", { count: itemCount })}
+              </p>
+            </div>
             <button
               onClick={fetchOrder}
               className="rounded-full border border-primary p-1.5 text-primary transition-colors hover:bg-primary/5"
+              aria-label={t("refresh")}
             >
               <RefreshCw size={14} />
             </button>
@@ -151,7 +179,7 @@ export default function OrderDetailPage() {
                   <span className="font-semibold text-dark dark:text-gray-200">
                     {t("phoneNumber")}:
                   </span>{" "}
-                  <span className="text-gray-text">{addr.phoneNumber}</span>
+                  <span className="text-gray-text" dir="ltr">{addr.phoneNumber}</span>
                 </p>
                 <p>
                   <span className="font-semibold text-dark dark:text-gray-200">
@@ -208,6 +236,19 @@ export default function OrderDetailPage() {
                   <SarIcon /> {Number(order.total).toFixed(2)}
                 </span>
               </div>
+
+              {/*
+                Cancelled items are refunded without rewriting the order's
+                totals — those record what was charged. Saying so here stops
+                the summary looking wrong to a customer who just cancelled
+                something and sees the same total as before.
+              */}
+              {(order.paymentStatus === "PARTIALLY_REFUNDED" ||
+                order.paymentStatus === "REFUNDED") && (
+                <p className="rounded-lg bg-primary/5 px-3 py-2 text-xs text-gray-text">
+                  {t("refundInProgress")}
+                </p>
+              )}
             </div>
           </div>
 

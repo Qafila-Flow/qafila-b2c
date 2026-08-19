@@ -9,52 +9,56 @@ import {
   CircleCheck,
   Clock,
 } from "lucide-react";
-import type { OrderStatus } from "@/types/order";
+import type { OrderStatus, VendorOrderResponse } from "@/types/order";
+import {
+  STATUS_ORDER,
+  formatOrderDate,
+  isTerminal,
+  statusDate,
+} from "@/lib/order-status";
 
 const TIMELINE_STEPS: {
   key: string;
   icon: typeof ShoppingBag;
+  /** The status this step represents, for looking up its real date. */
+  status: OrderStatus;
+  /** Statuses that mean "you are standing on this step right now". */
   statuses: OrderStatus[];
 }[] = [
-  { key: "orderPlaced", icon: ShoppingBag, statuses: ["PLACED", "PENDING"] },
-  { key: "confirmed", icon: CheckCircle, statuses: ["CONFIRMED"] },
-  { key: "packed", icon: Package, statuses: ["PACKED"] },
-  { key: "shipped", icon: Truck, statuses: ["SHIPPED"] },
-  { key: "delivered", icon: CircleCheck, statuses: ["DELIVERED"] },
-];
-
-// Order of statuses for progress calculation
-const STATUS_ORDER: OrderStatus[] = [
-  "PENDING",
-  "PLACED",
-  "CONFIRMED",
-  "PACKED",
-  "SHIPPED",
-  "DELIVERED",
+  {
+    key: "orderPlaced",
+    icon: ShoppingBag,
+    status: "PLACED",
+    statuses: ["PLACED", "PENDING"],
+  },
+  { key: "confirmed", icon: CheckCircle, status: "CONFIRMED", statuses: ["CONFIRMED"] },
+  { key: "packed", icon: Package, status: "PACKED", statuses: ["PACKED"] },
+  { key: "shipped", icon: Truck, status: "SHIPPED", statuses: ["SHIPPED"] },
+  { key: "delivered", icon: CircleCheck, status: "DELIVERED", statuses: ["DELIVERED"] },
 ];
 
 interface Props {
-  status: OrderStatus;
-  createdAt: string;
+  /**
+   * The SHIPMENT this timeline describes.
+   *
+   * One timeline per shipment, not one per order: in a multi-vendor order each
+   * vendor packs and ships on their own schedule, and a single rail across all
+   * of them can only show the slowest — which is what it used to do, silently.
+   */
+  shipment: VendorOrderResponse;
+  /** Tighter spacing when several of these are stacked on one page. */
+  compact?: boolean;
 }
 
-export default function OrderStatusTimeline({ status, createdAt }: Props) {
+export default function OrderStatusTimeline({ shipment, compact }: Props) {
   const t = useTranslations("orders");
   const locale = useLocale();
 
+  const status = shipment.status;
   const currentIndex = STATUS_ORDER.indexOf(status);
-  const isCancelled = status === "CANCELLED" || status === "REFUNDED";
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    });
-  };
-
-  if (isCancelled) {
+  if (isTerminal(status)) {
+    const stoppedAt = statusDate(shipment, status);
     return (
       <div className="flex items-center gap-3 rounded-lg bg-discount/5 p-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-discount/10">
@@ -62,10 +66,11 @@ export default function OrderStatusTimeline({ status, createdAt }: Props) {
         </div>
         <div>
           <p className="text-sm font-semibold text-discount">
-            {t(status.toLowerCase() as any)}
+            {t(status.toLowerCase() as never)}
           </p>
           <p className="text-xs text-gray-text">
-            {t(`statusDescriptions.${status}`)}
+            {t(`statusDescriptions.${status}` as never)}
+            {stoppedAt ? ` · ${formatOrderDate(stoppedAt, locale)}` : ""}
           </p>
         </div>
       </div>
@@ -75,14 +80,16 @@ export default function OrderStatusTimeline({ status, createdAt }: Props) {
   return (
     <div className="space-y-0">
       {TIMELINE_STEPS.map((step, i) => {
-        // A step is "reached" if the current status is at or past it
-        const stepMaxIndex = Math.max(
-          ...step.statuses.map((s) => STATUS_ORDER.indexOf(s)),
-        );
-        const isReached = currentIndex >= stepMaxIndex;
+        const stepIndex = STATUS_ORDER.indexOf(step.status);
+        const isReached = currentIndex >= stepIndex;
         const isCurrentStep = step.statuses.includes(status);
         const Icon = step.icon;
         const isLast = i === TIMELINE_STEPS.length - 1;
+
+        // The real date this step happened, from the shipment's transition
+        // history. Null for steps recorded before the history existed — better
+        // no date than the order-creation date printed against "Delivered".
+        const reachedAt = isReached ? statusDate(shipment, step.status) : null;
 
         return (
           <div key={step.key} className="flex gap-3">
@@ -99,7 +106,7 @@ export default function OrderStatusTimeline({ status, createdAt }: Props) {
               </div>
               {!isLast && (
                 <div
-                  className={`w-0.5 flex-1 min-h-8 ${
+                  className={`w-0.5 flex-1 ${compact ? "min-h-5" : "min-h-8"} ${
                     isReached && !isCurrentStep ? "bg-dark" : "bg-gray-border"
                   }`}
                 />
@@ -107,22 +114,22 @@ export default function OrderStatusTimeline({ status, createdAt }: Props) {
             </div>
 
             {/* Text */}
-            <div className={`pb-6 ${isLast ? "pb-0" : ""}`}>
+            <div className={isLast ? "pb-0" : compact ? "pb-4" : "pb-6"}>
               <p
                 className={`text-sm font-semibold ${
                   isReached ? "text-dark dark:text-gray-100" : "text-gray-text"
                 }`}
               >
-                {t(step.key as any)}
-                {isReached && (
+                {t(step.key as never)}
+                {reachedAt && (
                   <span className="ms-2 text-xs font-normal text-gray-text">
-                    {formatDate(createdAt)}
+                    {formatOrderDate(reachedAt, locale)}
                   </span>
                 )}
               </p>
               {isCurrentStep && (
                 <p className="mt-0.5 text-xs text-gray-text">
-                  {t(`statusDescriptions.${status}`)}
+                  {t(`statusDescriptions.${status}` as never)}
                 </p>
               )}
             </div>

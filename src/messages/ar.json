@@ -588,7 +588,19 @@
       "REFUNDED": "تم استرداد المبلغ"
     },
     "back": "رجوع",
-    "completePayment": "إتمام الدفع"
+    "completePayment": "إتمام الدفع",
+    "shipmentsTitle": "{count} شحنات",
+    "shipmentOf": "الشحنة {index} من {total}",
+    "shipmentsDelivered": "تم توصيل {delivered} من {total}",
+    "shipmentFallbackStore": "البائع",
+    "shipmentTooLate": "تم {status} بالفعل",
+    "nothingCancellable": "لا يمكن إلغاء أي شيء في هذا الطلب — تم تغليف أو شحن جميع الشحنات.",
+    "cancelFailed": "تعذر إلغاء هذا المنتج. ربما تقدمت شحنته — حدّث الصفحة وحاول مرة أخرى.",
+    "refundInProgress": "جارٍ استرداد قيمة المنتجات الملغاة إلى وسيلة الدفع الأصلية. المبالغ أعلاه تعرض ما تم تحصيله في الأصل.",
+    "trackingNumber": "رقم التتبع",
+    "refresh": "تحديث",
+    "previous": "السابق",
+    "next": "التالي"
   },
   "invoice": {
     "title": "الفاتورة",
