@@ -16,6 +16,14 @@ interface AuthContextValue {
   token: string | null;
   isLoggedIn: boolean;
   login: (token: string, user: User) => void;
+  /**
+   * Merge fields into the cached user.
+   *
+   * The user lives in React state AND in localStorage, so a profile change made
+   * mid-session (the email Tamara needs, say) has to be written to both or the
+   * next mount reads the stale copy back and asks for it again.
+   */
+  updateUser: (patch: Partial<User>) => void;
   logout: () => void;
 }
 
@@ -60,6 +68,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(USER_KEY, JSON.stringify(newUser));
   }, []);
 
+  const updateUser = useCallback((patch: Partial<User>) => {
+    setUser((current) => {
+      if (!current) return current;
+      const merged = { ...current, ...patch };
+      localStorage.setItem(USER_KEY, JSON.stringify(merged));
+      return merged;
+    });
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await apiLogout();
@@ -74,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoggedIn: !!token, login, logout }}
+      value={{ user, token, isLoggedIn: !!token, login, updateUser, logout }}
     >
       {children}
     </AuthContext.Provider>

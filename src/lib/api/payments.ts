@@ -35,8 +35,44 @@ export interface PaymentConfig {
   };
 }
 
+export type PaymentProviderId = "MOYASAR" | "TAMARA" | "MOCK" | "MANUAL";
+
+/**
+ * How the customer reaches the provider.
+ *
+ * HOSTED_FORM - the provider's script renders card fields inside our page.
+ * REDIRECT    - navigate the browser to `redirectUrl` on the provider's domain.
+ */
+export type PaymentFlow = "HOSTED_FORM" | "REDIRECT";
+
+/** Why a method is offered but cannot be used for this order. */
+export type MethodUnavailableReason =
+  | "BELOW_MINIMUM"
+  | "ABOVE_MAXIMUM"
+  | "NOT_ELIGIBLE"
+  | "PROVIDER_DOWN"
+  | "EMAIL_REQUIRED";
+
+export interface PaymentMethodOption {
+  id: "CARD" | "TAMARA";
+  provider: PaymentProviderId;
+  flow: PaymentFlow;
+  available: boolean;
+  /** BNPL only: how many instalments the customer is eligible for. */
+  instalments?: number;
+  /** SAR per instalment, for display. Already rounded by the server. */
+  instalmentAmount?: number;
+  descriptionEn?: string;
+  descriptionAr?: string;
+  unavailableReason?: MethodUnavailableReason | null;
+}
+
 export interface InitiatedPayment {
   paymentId: string;
+  provider: PaymentProviderId;
+  flow: PaymentFlow;
+  /** Present only when flow === "REDIRECT". Send the browser here. */
+  redirectUrl?: string;
   purpose: "ORDER" | "SUBSCRIPTION";
   /** SAR, for display only. */
   amount: number;
@@ -73,6 +109,37 @@ export async function getPaymentConfig(): Promise<PaymentConfig> {
   return apiClient.get("/payments/config");
 }
 
+/**
+ * Which ways this customer can pay for this order.
+ *
+ * Depends on the basket and the customer, so unlike `getPaymentConfig` it must
+ * not be cached or shared. A method that exists but cannot be used comes back
+ * with `available: false` and a reason rather than being omitted.
+ */
+export async function getPaymentMethods(
+  orderId: string,
+): Promise<{ methods: PaymentMethodOption[] }> {
+  return apiClient.get("/payments/methods", { params: { orderId } });
+}
+
+/**
+ * Is this somewhere we are willing to send the customer?
+ *
+ * The URL comes from our own API, so this is defence in depth - but it is the
+ * difference between a compromised response being a bug and being an open
+ * redirect that phishes payment details. Matched on the host suffix with a
+ * leading dot so `tamara.co.evil.com` cannot pass.
+ */
+export function isTrustedRedirect(url: string): boolean {
+  try {
+    const { protocol, hostname } = new URL(url);
+    if (protocol !== "https:") return false;
+    return hostname === "tamara.co" || hostname.endsWith(".tamara.co");
+  } catch {
+    return false;
+  }
+}
+
 export type BillingCycle = "MONTHLY" | "ANNUALLY";
 
 export async function initiatePayment(dto: {
@@ -83,6 +150,11 @@ export async function initiatePayment(dto: {
   /** Required for SUBSCRIPTION, ignored for ORDER. */
   billingCycle?: BillingCycle;
   idempotencyKey?: string;
+  /** Omit for the card flow. TAMARA is only valid for purpose=ORDER. */
+  provider?: "MOYASAR" | "TAMARA";
+  /** Locale for the provider-hosted page. */
+  locale?: "en" | "ar";
+  isMobile?: boolean;
 }): Promise<InitiatedPayment> {
   return apiClient.post("/payments/initiate", dto);
 }

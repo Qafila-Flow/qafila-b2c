@@ -1,5 +1,27 @@
 import axios from "axios";
 
+/**
+ * An error the API described, rather than a transport failure.
+ *
+ * The interceptor below used to flatten every rejection to `new Error(message)`,
+ * which threw away the machine-readable `code` some endpoints return. That is
+ * fine while a message is only ever shown to a human, and wrong the moment the
+ * UI has to *act* on a specific failure - `EMAIL_REQUIRED` from the payments
+ * initiate endpoint renders an email field, and matching on a translated
+ * message string to decide that would break in Arabic.
+ */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    /** Stable identifier, e.g. "EMAIL_REQUIRED". Absent on most errors. */
+    readonly code?: string,
+    readonly status?: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 const apiClient = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/v1`,
   headers: {
@@ -46,9 +68,20 @@ apiClient.interceptors.response.use(
         localStorage.removeItem("qafila_user");
         window.dispatchEvent(new Event("qafila:logout"));
       }
+      const data = error.response?.data as
+        | { message?: string | string[]; code?: string }
+        | undefined;
+
+      // Nest's ValidationPipe returns `message` as an array of strings.
+      const raw = data?.message;
       const message =
-        error.response?.data?.message || error.message || "An error occurred";
-      return Promise.reject(new Error(message));
+        (Array.isArray(raw) ? raw[0] : raw) ||
+        error.message ||
+        "An error occurred";
+
+      return Promise.reject(
+        new ApiError(message, data?.code, error.response?.status),
+      );
     }
     return Promise.reject(error);
   },

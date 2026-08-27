@@ -7,16 +7,23 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { CreditCard, Lock, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { getOrder } from "@/lib/api/orders";
+import { ApiError } from "@/lib/api/client";
 import {
   getPaymentConfig,
+  getPaymentMethods,
   initiatePayment,
+  isTrustedRedirect,
   type BillingCycle,
   type InitiatedPayment,
   type PaymentConfig,
+  type PaymentMethodOption,
 } from "@/lib/api/payments";
 import type { OrderResponse } from "@/types/order";
 import MoyasarForm from "@/components/payments/MoyasarForm";
 import MockPaymentPanel from "@/components/payments/MockPaymentPanel";
+import PaymentMethodPicker from "@/components/payments/PaymentMethodPicker";
+import TamaraRedirect from "@/components/payments/TamaraRedirect";
+import TamaraEmailStep from "@/components/payments/TamaraEmailStep";
 import SarIcon from "@/components/shared/SarIcon";
 
 /**
@@ -32,6 +39,14 @@ import SarIcon from "@/components/shared/SarIcon";
  * card never re-creates it. The payment intent is keyed by an idempotency key
  * held in sessionStorage, so refreshing reuses the same payment rather than
  * leaving a trail of abandoned ones.
+ *
+ * ── Two steps, not one ─────────────────────────────────────────────────────
+ *
+ * With more than one gateway the page can no longer create a payment on mount:
+ * it has to know which one first. So an order asks the API which methods it can
+ * offer, renders a picker, and only then initiates. When there is a single
+ * method (subscriptions, or a deployment with BNPL off) it is auto-selected and
+ * the flow looks exactly as it did before — one extra request, no extra click.
  */
 
 function idempotencyKeyFor(target: string): string {
@@ -42,6 +57,10 @@ function idempotencyKeyFor(target: string): string {
   const key = crypto.randomUUID();
   sessionStorage.setItem(storageKey, key);
   return key;
+}
+
+function clearIdempotencyKey(target: string): void {
+  sessionStorage.removeItem(`qafila_payment_key_${target}`);
 }
 
 function PaymentPageInner() {
@@ -57,11 +76,30 @@ function PaymentPageInner() {
 
   const [order, setOrder] = useState<OrderResponse | null>(null);
   const [config, setConfig] = useState<PaymentConfig | null>(null);
+  const [methods, setMethods] = useState<PaymentMethodOption[]>([]);
+  const [selected, setSelected] = useState<PaymentMethodOption["id"] | null>(
+    null,
+  );
   const [intent, setIntent] = useState<InitiatedPayment | null>(null);
   const [loading, setLoading] = useState(true);
+  const [preparing, setPreparing] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const [needsEmail, setNeedsEmail] = useState(false);
   const [error, setError] = useState("");
 
-  const start = useCallback(async () => {
+  /**
+   * The idempotency key varies by provider: switching from a declined card to
+   * Tamara must create a new payment, not return the failed card one.
+   */
+  const targetKey = useCallback(
+    (provider: "MOYASAR" | "TAMARA") =>
+      (orderId ? `order_${orderId}` : `plan_${planId}_${cycle}`) +
+      `_${provider}`,
+    [orderId, planId, cycle],
+  );
+
+  // ── Step one: what can this customer pay with? ────────────────────────────
+  const load = useCallback(async () => {
     if (!orderId && !planId) {
       setError(t("payment.missingOrder"));
       setLoading(false);
@@ -78,41 +116,126 @@ function PaymentPageInner() {
       if (orderId) {
         const loadedOrder = await getOrder(orderId);
 
-        // Already settled — don't show a card form for money we have.
+        // Already settled — don't show a payment form for money we have.
         if (loadedOrder.paymentStatus === "PAID") {
           router.replace(`/profile/orders/${orderId}`);
           return;
         }
         setOrder(loadedOrder);
+
+        const { methods: available } = await getPaymentMethods(orderId);
+        setMethods(available);
+
+        // Auto-select when there is nothing to choose between, so the
+        // card-only path is unchanged from the customer's point of view.
+        const selectable = available.filter((method) => method.available);
+        if (selectable.length === 1) setSelected(selectable[0].id);
+      } else {
+        // Subscriptions are card-only: BNPL on a recurring charge is not a
+        // product we offer, and the API refuses it anyway.
+        setMethods([
+          {
+            id: "CARD",
+            provider: loadedConfig.provider.toUpperCase() as "MOYASAR",
+            flow: "HOSTED_FORM",
+            available: true,
+          },
+        ]);
+        setSelected("CARD");
       }
-
-      const created = await initiatePayment({
-        purpose: orderId ? "ORDER" : "SUBSCRIPTION",
-        targetId: (orderId ?? planId) as string,
-        ...(planId ? { billingCycle: cycle } : {}),
-        // Absolute, and must match an origin the API allows — this is the
-        // open-redirect allowlist, so a new domain needs an env change too.
-        returnUrl: `${window.location.origin}/${locale}/checkout/result`,
-        idempotencyKey: idempotencyKeyFor(
-          orderId ? `order_${orderId}` : `plan_${planId}_${cycle}`,
-        ),
-      });
-
-      setIntent(created);
     } catch (e) {
       setError(e instanceof Error ? e.message : t("payment.initFailed"));
     } finally {
       setLoading(false);
     }
-  }, [orderId, planId, cycle, locale, router, t]);
+  }, [orderId, planId, router, t]);
 
   useEffect(() => {
     if (!isLoggedIn) {
       setLoading(false);
       return;
     }
-    void start();
-  }, [isLoggedIn, start]);
+    void load();
+  }, [isLoggedIn, load]);
+
+  // ── Step two: create the payment for the chosen method ────────────────────
+  const prepare = useCallback(
+    async (methodId: PaymentMethodOption["id"]) => {
+      const provider = methodId === "TAMARA" ? "TAMARA" : "MOYASAR";
+      const key = targetKey(provider);
+
+      setPreparing(true);
+      setError("");
+      setNeedsEmail(false);
+
+      try {
+        const created = await initiatePayment({
+          purpose: orderId ? "ORDER" : "SUBSCRIPTION",
+          targetId: (orderId ?? planId) as string,
+          ...(planId ? { billingCycle: cycle } : {}),
+          ...(methodId === "TAMARA" ? { provider: "TAMARA" as const } : {}),
+          locale: locale === "ar" ? "ar" : "en",
+          isMobile:
+            typeof window !== "undefined" && window.innerWidth < 768,
+          // Absolute, and must match an origin the API allows — this is the
+          // open-redirect allowlist, so a new domain needs an env change too.
+          returnUrl: `${window.location.origin}/${locale}/checkout/result`,
+          idempotencyKey: idempotencyKeyFor(key),
+        });
+
+        setIntent(created);
+        return created;
+      } catch (e) {
+        // Machine-readable, never the message: it is translated.
+        if (e instanceof ApiError && e.code === "EMAIL_REQUIRED") {
+          setNeedsEmail(true);
+          return null;
+        }
+
+        // A redirect session that timed out at the provider cannot be reused.
+        // Drop the key so the retry opens a fresh one.
+        if (e instanceof ApiError && e.status === 409) {
+          clearIdempotencyKey(key);
+        }
+
+        setError(e instanceof Error ? e.message : t("payment.initFailed"));
+        return null;
+      } finally {
+        setPreparing(false);
+      }
+    },
+    [orderId, planId, cycle, locale, targetKey, t],
+  );
+
+  // Card is prepared as soon as it is chosen, so the form can render.
+  useEffect(() => {
+    if (selected !== "CARD") return;
+    if (intent?.flow === "HOSTED_FORM") return;
+    void prepare("CARD");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
+
+  const goToTamara = useCallback(async () => {
+    setRedirecting(true);
+
+    const created = intent?.flow === "REDIRECT" ? intent : await prepare("TAMARA");
+
+    if (!created?.redirectUrl) {
+      setRedirecting(false);
+      return;
+    }
+
+    // Defence in depth: the URL came from our own API, but this is the
+    // difference between a compromised response being a bug and being an open
+    // redirect that phishes payment details.
+    if (!isTrustedRedirect(created.redirectUrl)) {
+      setError(t("payment.untrustedRedirect"));
+      setRedirecting(false);
+      return;
+    }
+
+    window.location.assign(created.redirectUrl);
+  }, [intent, prepare, t]);
 
   if (!isLoggedIn) {
     return (
@@ -129,6 +252,10 @@ function PaymentPageInner() {
       </div>
     );
   }
+
+  const tamaraMethod = methods.find((method) => method.id === "TAMARA");
+  const amount = intent?.amount ?? Number(order?.total ?? 0);
+  const showPicker = methods.length > 1;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -150,7 +277,7 @@ function PaymentPageInner() {
           </div>
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => void start()}
+              onClick={() => void load()}
               className="rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
             >
               {t("payment.tryAgain")}
@@ -165,7 +292,7 @@ function PaymentPageInner() {
         </div>
       )}
 
-      {!loading && !error && intent && config && (
+      {!loading && !error && config && (
         <div className="space-y-6">
           {/* What is being charged, from the server's own numbers. */}
           <div className="rounded-xl border border-gray-border dark:border-gray-700 bg-white dark:bg-dark p-6">
@@ -178,7 +305,7 @@ function PaymentPageInner() {
                   className="font-semibold text-dark dark:text-gray-100"
                   dir={order ? "ltr" : undefined}
                 >
-                  {order ? order.orderNumber : intent.description}
+                  {order ? order.orderNumber : (intent?.description ?? "")}
                 </p>
               </div>
               <div className="text-end">
@@ -187,7 +314,7 @@ function PaymentPageInner() {
                   className="text-xl font-bold text-dark dark:text-gray-100"
                   dir="ltr"
                 >
-                  <SarIcon /> {intent.amount.toFixed(2)}
+                  <SarIcon /> {amount.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -197,31 +324,89 @@ function PaymentPageInner() {
             <div className="mb-4 flex items-center gap-2">
               <CreditCard size={20} className="text-primary" />
               <h2 className="text-lg font-bold text-dark dark:text-gray-100">
-                {t("checkout.paymentMethod")}
+                {showPicker
+                  ? t("payment.chooseMethod")
+                  : t("checkout.paymentMethod")}
               </h2>
             </div>
 
-            {config.provider === "mock" ? (
-              <MockPaymentPanel
-                intent={intent}
-                onError={(message) => setError(message)}
-              />
-            ) : (
-              <MoyasarForm
-                intent={intent}
-                config={config}
-                onError={(message) => setError(message)}
-              />
+            {showPicker && (
+              <div className="mb-6">
+                <PaymentMethodPicker
+                  methods={methods}
+                  selected={selected}
+                  onSelect={(id) => {
+                    setSelected(id);
+                    setIntent(null);
+                    setNeedsEmail(false);
+                    setError("");
+                  }}
+                  disabled={preparing || redirecting}
+                />
+              </div>
             )}
 
-            <div className="mt-5 flex items-start gap-2 text-xs text-gray-text">
-              <ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" />
-              <p>{t("payment.securityNote")}</p>
-            </div>
-            <div className="mt-2 flex items-start gap-2 text-xs text-gray-text">
-              <Lock size={16} className="mt-0.5 shrink-0 text-primary" />
-              <p>{t("payment.threeDsNote")}</p>
-            </div>
+            {preparing && !intent && (
+              <div className="flex h-32 items-center justify-center">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-border dark:border-gray-700 border-t-primary" />
+              </div>
+            )}
+
+            {selected === "CARD" && intent?.flow === "HOSTED_FORM" && (
+              <>
+                {config.provider === "mock" ? (
+                  <MockPaymentPanel
+                    intent={intent}
+                    onError={(message) => setError(message)}
+                  />
+                ) : (
+                  <MoyasarForm
+                    intent={intent}
+                    config={config}
+                    onError={(message) => setError(message)}
+                  />
+                )}
+
+                <div className="mt-5 flex items-start gap-2 text-xs text-gray-text">
+                  <ShieldCheck
+                    size={16}
+                    className="mt-0.5 shrink-0 text-primary"
+                  />
+                  <p>{t("payment.securityNote")}</p>
+                </div>
+                <div className="mt-2 flex items-start gap-2 text-xs text-gray-text">
+                  <Lock size={16} className="mt-0.5 shrink-0 text-primary" />
+                  <p>{t("payment.threeDsNote")}</p>
+                </div>
+              </>
+            )}
+
+            {selected === "TAMARA" && tamaraMethod && (
+              <>
+                {needsEmail ? (
+                  <TamaraEmailStep
+                    onSaved={() => {
+                      setNeedsEmail(false);
+                      // The reason it was blocked is gone; carry straight on.
+                      void goToTamara();
+                    }}
+                  />
+                ) : (
+                  <TamaraRedirect
+                    method={tamaraMethod}
+                    total={amount}
+                    redirecting={redirecting || preparing}
+                    onContinue={() => void goToTamara()}
+                  />
+                )}
+              </>
+            )}
+
+            {!selected && showPicker && (
+              <p className="text-sm text-gray-text">
+                {t("payment.selectMethodPrompt")}
+              </p>
+            )}
           </div>
         </div>
       )}
