@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "cdn.qafila.com.sa",
+      },
+      {
+        protocol: "https",
         hostname: "api-qafila.mohyeldeen.dev",
       },
       {
