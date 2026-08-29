@@ -417,10 +417,9 @@ export default function ProductDetailClient({
               approved wording, which they require be used unmodified.
               Renders nothing when the deployment has no widget key.
             */}
-            <TamaraWidget
-              amount={Number(product.price)}
-              className="rounded-lg border border-[#EDBD96] dark:border-[#EDBD96]/50 p-3 dark:bg-[#EDBD96]/5"
-            />
+            {/* No wrapper: the widget draws its own outlined card, and ours
+                made it a box inside a box. */}
+            <TamaraWidget amount={Number(product.price)} />
           </div>
 
           {/* Size selector */}
