@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import Script from "next/script";
-import { getPaymentConfig } from "@/lib/api/payments";
+import { getBnplWidget } from "@/lib/api/payments";
 
 /**
  * Tamara's official promotional widget.
@@ -66,9 +66,9 @@ export default function TamaraWidget({
 
   useEffect(() => {
     let cancelled = false;
-    getPaymentConfig()
+    getBnplWidget()
       .then((cfg) => {
-        if (!cancelled) setPublicKey(cfg.tamara ? cfg.tamaraPublicKey : "");
+        if (!cancelled) setPublicKey(cfg.enabled ? cfg.publicKey : "");
       })
       // Promotional only. A config it cannot read means no widget, never a
       // broken product page.

@@ -117,6 +117,19 @@ export interface PaymentResponse {
   paidAt: string | null;
 }
 
+/**
+ * Whether to render Tamara's promotional widget, and the key it needs.
+ *
+ * Its own endpoint rather than part of `getPaymentConfig`, because the widget
+ * lives on product pages that anyone can open and that config needs a session.
+ */
+export async function getBnplWidget(): Promise<{
+  enabled: boolean;
+  publicKey: string;
+}> {
+  return apiClient.get("/payments/bnpl-widget");
+}
+
 export async function getPaymentConfig(): Promise<PaymentConfig> {
   return apiClient.get("/payments/config");
 }
