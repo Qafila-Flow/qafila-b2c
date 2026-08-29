@@ -126,6 +126,8 @@ export interface PaymentResponse {
 export async function getBnplWidget(): Promise<{
   enabled: boolean;
   publicKey: string;
+  /** Sandbox and live widgets ship from different CDNs; the API picks. */
+  scriptUrl: string;
 }> {
   return apiClient.get("/payments/bnpl-widget");
 }

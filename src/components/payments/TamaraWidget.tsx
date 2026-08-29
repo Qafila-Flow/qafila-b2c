@@ -44,8 +44,6 @@ declare module "react" {
   }
 }
 
-const SCRIPT_SRC = "https://cdn.tamara.co/widget-v2/tamara-widget.js";
-
 interface TamaraWidgetProps {
   /** SAR, gross. The number the customer would actually pay. */
   amount: number;
@@ -61,6 +59,9 @@ export default function TamaraWidget({
 }: TamaraWidgetProps) {
   const locale = useLocale();
   const [publicKey, setPublicKey] = useState<string>("");
+  // Sandbox and live widgets come from different CDNs, and a key only resolves
+  // on its own. The API knows which environment it is pointed at; we do not.
+  const [scriptUrl, setScriptUrl] = useState<string>("");
   const [painted, setPainted] = useState(false);
   const host = useRef<HTMLDivElement>(null);
 
@@ -68,7 +69,9 @@ export default function TamaraWidget({
     let cancelled = false;
     getBnplWidget()
       .then((cfg) => {
-        if (!cancelled) setPublicKey(cfg.enabled ? cfg.publicKey : "");
+        if (cancelled) return;
+        setPublicKey(cfg.enabled ? cfg.publicKey : "");
+        setScriptUrl(cfg.scriptUrl);
       })
       // Promotional only. A config it cannot read means no widget, never a
       // broken product page.
@@ -113,7 +116,7 @@ export default function TamaraWidget({
     };
   }, [publicKey, locale, amount]);
 
-  if (!publicKey) return null;
+  if (!publicKey || !scriptUrl) return null;
 
   return (
     // Collapsed rather than `display: none` while it waits: the element has to
@@ -127,7 +130,7 @@ export default function TamaraWidget({
           : { height: 0, overflow: "hidden", visibility: "hidden" }
       }
     >
-      <Script src={SCRIPT_SRC} strategy="afterInteractive" />
+      <Script id="tamara-widget" src={scriptUrl} strategy="afterInteractive" />
       {/* Tamara's custom element. It renders its own logo and copy. */}
       <tamara-widget
         type="tamara-summary"
