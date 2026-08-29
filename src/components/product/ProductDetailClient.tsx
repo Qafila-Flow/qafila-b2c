@@ -18,6 +18,7 @@ import type { ReviewData } from "./ReviewCard";
 import type { Product } from "@/components/shared/ProductCard";
 import type { ProductTag } from "@/lib/api/products";
 import ProductCard from "@/components/shared/ProductCard";
+import TamaraWidget from "@/components/payments/TamaraWidget";
 import VendorBanner from "./VendorBanner";
 import type { VendorData } from "./VendorBanner";
 import LoginModal from "@/components/auth/LoginModal";
@@ -409,24 +410,17 @@ export default function ProductDetailClient({
                 {t("learnMore")}
               </button>
             </div>
-            {/* Tamara */}
-            <div className="rounded-lg border border-[#EDBD96] dark:border-[#EDBD96]/50 p-3 relative dark:bg-[#EDBD96]/5">
-              <div className="mb-2 absolute top-0 left-0">
-                <Image
-                  src="/images/tamara.svg"
-                  alt="Tamara"
-                  width={72}
-                  height={20}
-                  className="h-5 w-auto"
-                />
-              </div>
-              <p className="text-sm leading-relaxed text-gray-text mt-4">
-                {t.rich("tamaraText", { amount: installment, sar: sarTag })}
-              </p>
-              <button className="mt-1 text-[11px] font-semibold text-dark dark:text-gray-200 underline">
-                {t("learnMore")}
-              </button>
-            </div>
+            {/*
+              Tamara's own widget, not our arithmetic. It asks Tamara what this
+              amount is eligible for, so it stops promising instalments on
+              baskets Tamara would refuse — and it carries their logo and
+              approved wording, which they require be used unmodified.
+              Renders nothing when the deployment has no widget key.
+            */}
+            <TamaraWidget
+              amount={Number(product.price)}
+              className="rounded-lg border border-[#EDBD96] dark:border-[#EDBD96]/50 p-3 dark:bg-[#EDBD96]/5"
+            />
           </div>
 
           {/* Size selector */}

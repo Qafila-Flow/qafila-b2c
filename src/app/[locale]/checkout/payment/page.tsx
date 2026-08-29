@@ -192,6 +192,22 @@ function PaymentPageInner() {
           return null;
         }
 
+        // Both mean "Tamara cannot be used for this order" and both are
+        // actionable by the customer — fix the delivery phone, or pay by card.
+        // Neither is worth a retry, so say so rather than showing initFailed.
+        if (
+          e instanceof ApiError &&
+          (e.code === "PHONE_INVALID" || e.code === "TAMARA_REJECTED")
+        ) {
+          setError(
+            e.code === "PHONE_INVALID"
+              ? t("payment.tamaraPhoneInvalid")
+              : t("payment.tamaraUnavailable"),
+          );
+          setSelected("CARD");
+          return null;
+        }
+
         // A redirect session that timed out at the provider cannot be reused.
         // Drop the key so the retry opens a fresh one.
         if (e instanceof ApiError && e.status === 409) {

@@ -26,6 +26,16 @@ export interface PaymentConfig {
   publishableKey: string;
   methods: string[];
   supportedNetworks: string[];
+  /**
+   * Whether this deployment offers BNPL at all. Deployment-wide, not per-basket:
+   * whether *this* order can use it comes from `getPaymentMethods`.
+   */
+  tamara: boolean;
+  /**
+   * Widget key only — public by design and powerless. Empty when there is no
+   * widget to render, which is the storefront's cue to render none.
+   */
+  tamaraPublicKey: string;
   currency: string;
   /** Present only when Apple Pay is enabled for this deployment. */
   applePay?: {
@@ -51,7 +61,9 @@ export type MethodUnavailableReason =
   | "ABOVE_MAXIMUM"
   | "NOT_ELIGIBLE"
   | "PROVIDER_DOWN"
-  | "EMAIL_REQUIRED";
+  | "EMAIL_REQUIRED"
+  /** The delivery address has no usable Saudi mobile. Fixable by the customer. */
+  | "PHONE_INVALID";
 
 export interface PaymentMethodOption {
   id: "CARD" | "TAMARA";

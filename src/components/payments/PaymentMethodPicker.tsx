@@ -65,6 +65,8 @@ export default function PaymentMethodPicker({
         return t("payment.tamaraProviderDown");
       case "NOT_ELIGIBLE":
         return t("payment.tamaraUnavailable");
+      case "PHONE_INVALID":
+        return t("payment.tamaraPhoneInvalid");
       // Not a blocker - the email step handles it once Tamara is picked.
       case "EMAIL_REQUIRED":
         return null;

@@ -496,6 +496,8 @@
     "itemsLabel": "Items",
     "cardPayment": "Credit or debit card (mada, Visa, Mastercard)",
     "cardPaymentNote": "You will enter your card details securely on the next step.",
+    "paymentChoiceNext": "You will choose how to pay on the next step.",
+    "tamaraOption": "Tamara - split into interest-free payments",
     "continueToPayment": "Continue to payment"
   },
   "payment": {
@@ -537,6 +539,7 @@
     "tamaraBelowMinimum": "This order is below Tamara's minimum",
     "tamaraAboveMaximum": "This order is above Tamara's maximum",
     "tamaraProviderDown": "Tamara is not responding right now. Please pay by card.",
+    "tamaraPhoneInvalid": "Tamara needs a Saudi mobile number on your delivery address. Update it, or pay by card.",
     "tamaraCancelled": "You cancelled the Tamara payment. Your order is still waiting.",
     "untrustedRedirect": "That payment link could not be verified, so we did not open it. Please try again or pay by card.",
     "emailRequiredTitle": "We need your email",

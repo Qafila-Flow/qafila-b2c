@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { getAddresses, type Address } from "@/lib/api/addresses";
 import { checkout } from "@/lib/api/orders";
+import { getPaymentConfig } from "@/lib/api/payments";
+import TamaraWidget from "@/components/payments/TamaraWidget";
 import Image from "next/image";
 import { getMediaUrl } from "@/lib/utils";
 import SarIcon from "@/components/shared/SarIcon";
@@ -32,6 +34,9 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [addressLoading, setAddressLoading] = useState(true);
   const [error, setError] = useState("");
+  // Only decides whether BNPL is worth naming below. There is no order yet, so
+  // per-basket eligibility cannot be known here — that is the next page's job.
+  const [bnplOffered, setBnplOffered] = useState(false);
 
   // Fetch addresses
   useEffect(() => {
@@ -49,6 +54,14 @@ export default function CheckoutPage() {
       .catch(() => {})
       .finally(() => setAddressLoading(false));
   }, [isLoggedIn]);
+
+  // Failure is silent on purpose: this only enriches a preview, and nobody
+  // should be blocked from checking out because it could not be read.
+  useEffect(() => {
+    getPaymentConfig()
+      .then((cfg) => setBnplOffered(cfg.tamara))
+      .catch(() => {});
+  }, []);
 
   // Redirect if not logged in
   if (!isLoggedIn) {
@@ -234,21 +247,26 @@ export default function CheckoutPage() {
                 {t("checkout.paymentMethod")}
               </h2>
             </div>
-            <div className="rounded-lg border border-primary bg-primary/5 p-4">
-              <div className="flex items-center gap-3">
-                <input
-                  type="radio"
-                  checked
-                  readOnly
-                  className="accent-primary"
-                />
-                <span className="text-sm font-medium text-dark dark:text-gray-100">
-                  {t("checkout.cardPayment")}
-                </span>
-              </div>
-              <p className="mt-2 text-xs text-gray-text">
-                {t("checkout.cardPaymentNote")}
+            {/*
+              Informational, not a control. The choice is made on the next page,
+              where the order exists and eligibility can actually be checked —
+              a radio here would be deciding nothing while looking like it did.
+            */}
+            <div className="rounded-lg border border-gray-border dark:border-gray-700 p-4">
+              <p className="text-sm text-dark dark:text-gray-100">
+                {t("checkout.paymentChoiceNext")}
               </p>
+              <ul className="mt-3 space-y-1.5 text-xs text-gray-text">
+                <li>{t("checkout.cardPayment")}</li>
+                {bnplOffered && <li>{t("checkout.tamaraOption")}</li>}
+              </ul>
+              {/*
+                Tamara's own widget prices the real basket, so the plan shown
+                here is the one the next page will actually offer.
+              */}
+              {bnplOffered && summary && (
+                <TamaraWidget amount={summary.total} className="mt-3" />
+              )}
             </div>
           </div>
         </div>
