@@ -202,7 +202,7 @@
     "addPhoneTitle": "Add your phone number",
     "addPhoneSubtitle": "We use it to confirm your orders and arrange delivery.",
     "googleError": "Google sign-in failed. Please try again.",
-    "termsText": "By signing up or logging in, you agree to our Terms of Service and Privacy Policy.",
+    "termsText": "By signing up or logging in, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>.",
     "verifyTitle": "Enter verification code",
     "otpSentTo": "We sent a code to {phone}",
     "verify": "Verify",

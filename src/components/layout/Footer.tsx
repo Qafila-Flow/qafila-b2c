@@ -350,14 +350,14 @@ export default function Footer() {
             <h4 className="mb-4 text-sm font-bold">{t("legal")}</h4>
             <ul className="space-y-2 text-xs text-gray-400">
               <li>
-                <a href="#" className="hover:text-white">
+                <Link href="/terms" className="hover:text-white">
                   {t("legalLinks.termsConditions")}
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <Link href="/privacy" className="hover:text-white">
                   {t("legalLinks.privacyPolicy")}
-                </a>
+                </Link>
               </li>
               <li>
                 <a href="#" className="hover:text-white">

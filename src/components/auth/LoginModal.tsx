@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { X, Phone, ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import {
@@ -361,9 +362,28 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                     {t("continueApple")}
                   </button>
 
-                  {/* Terms */}
+                  {/* Terms - linked, since this is the point of consent. */}
                   <p className="text-center text-[11px] leading-relaxed text-gray-text">
-                    {t("termsText")}
+                    {t.rich("termsText", {
+                      terms: (chunks) => (
+                        <Link
+                          href="/terms"
+                          onClick={onClose}
+                          className="underline hover:text-primary"
+                        >
+                          {chunks}
+                        </Link>
+                      ),
+                      privacy: (chunks) => (
+                        <Link
+                          href="/privacy"
+                          onClick={onClose}
+                          className="underline hover:text-primary"
+                        >
+                          {chunks}
+                        </Link>
+                      ),
+                    })}
                   </p>
                 </>
               )}
