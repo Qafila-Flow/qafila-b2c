@@ -4,16 +4,26 @@ import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import { X, Phone, ArrowLeft } from "lucide-react";
 import Image from "next/image";
-import { requestOtp, verifyOtp } from "@/lib/api/auth";
+import {
+  requestOtp,
+  verifyOtp,
+  googleLogin,
+  requestPhoneOtp,
+  verifyPhoneOtp,
+  type AuthResponse,
+} from "@/lib/api/auth";
 import { useAuth } from "@/lib/auth-context";
 import { useOneSignal } from "@/lib/onesignal-context";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 interface LoginModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-type Step = "phone" | "otp";
+// "addPhone"/"addPhoneOtp" are the Google branch: the account exists and is
+// signed in, but has no phone yet and checkout needs one.
+type Step = "phone" | "otp" | "addPhone" | "addPhoneOtp";
 
 export default function LoginModal({ open, onClose }: LoginModalProps) {
   const t = useTranslations("auth");
@@ -26,6 +36,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(0);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -37,6 +48,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
       setOtp(["", "", "", "", "", ""]);
       setError("");
       setLoading(false);
+      setGoogleLoading(false);
       setCountdown(0);
     }
   }, [open]);
@@ -101,12 +113,91 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
     }
   };
 
+  /**
+   * Google returns an account that may have no phone. Sign in either way, then
+   * stay open on the phone step when one is still needed - closing here would
+   * strand the customer at checkout, which requires a number.
+   */
+  const handleGoogleCredential = async (idToken: string) => {
+    setError("");
+    setGoogleLoading(true);
+    try {
+      const data: AuthResponse = await googleLogin({ idToken });
+      if (data.user.role !== "CUSTOMER") {
+        setError(t("customerOnly"));
+        return;
+      }
+      login(data.accessToken, data.user);
+      promptForPush();
+
+      if (data.requiresPhone) {
+        setPhoneNumber("");
+        setOtp(["", "", "", "", "", ""]);
+        setStep("addPhone");
+        return;
+      }
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("errorGeneric"));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleRequestPhoneOtp = async () => {
+    if (!phoneNumber.trim()) return;
+    setError("");
+    setLoading(true);
+    try {
+      await requestPhoneOtp({ phoneNumber: formattedPhone });
+      setStep("addPhoneOtp");
+      setCountdown(60);
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("errorGeneric"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyPhoneOtp = async (otpValue?: string) => {
+    const code = otpValue || otp.join("");
+    if (code.length !== 6) return;
+    setError("");
+    setLoading(true);
+    try {
+      const data = await verifyPhoneOtp({
+        phoneNumber: formattedPhone,
+        otp: code,
+      });
+      // Fresh token - the JWT payload carries the phone number.
+      login(data.accessToken, data.user);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("errorGeneric"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isAddPhoneFlow = step === "addPhone" || step === "addPhoneOtp";
+
+  const submitOtp = (code?: string) =>
+    step === "addPhoneOtp" ? handleVerifyPhoneOtp(code) : handleVerifyOtp(code);
+
+  const submitPhone = () =>
+    step === "addPhone" ? handleRequestPhoneOtp() : handleRequestOtp();
+
   const handleResend = async () => {
     if (countdown > 0) return;
     setError("");
     setLoading(true);
     try {
-      await requestOtp({ phoneNumber: formattedPhone });
+      if (step === "addPhoneOtp") {
+        await requestPhoneOtp({ phoneNumber: formattedPhone });
+      } else {
+        await requestOtp({ phoneNumber: formattedPhone });
+      }
       setCountdown(60);
       setOtp(["", "", "", "", "", ""]);
       otpRefs.current[0]?.focus();
@@ -131,7 +222,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
     // Auto-submit when all 6 digits entered
     if (digit && index === 5) {
       const code = newOtp.join("");
-      if (code.length === 6) handleVerifyOtp(code);
+      if (code.length === 6) submitOtp(code);
     }
   };
 
@@ -155,7 +246,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
     setOtp(newOtp);
     const nextIdx = Math.min(pasted.length, 5);
     otpRefs.current[nextIdx]?.focus();
-    if (pasted.length === 6) handleVerifyOtp(pasted);
+    if (pasted.length === 6) submitOtp(pasted);
   };
 
   if (!open) return null;
@@ -190,11 +281,20 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
 
         {/* Bottom - Form */}
         <div className="flex flex-col justify-center px-8 py-8">
-          {step === "phone" ? (
+          {step === "phone" || step === "addPhone" ? (
             <>
-              <h2 className="mb-8 text-center text-xl font-semibold text-dark dark:text-gray-100">
-                {t("loginTitle")}
+              <h2
+                className={`text-center text-xl font-semibold text-dark dark:text-gray-100 ${
+                  isAddPhoneFlow ? "mb-2" : "mb-8"
+                }`}
+              >
+                {isAddPhoneFlow ? t("addPhoneTitle") : t("loginTitle")}
               </h2>
+              {isAddPhoneFlow && (
+                <p className="mb-6 text-center text-sm text-gray-text">
+                  {t("addPhoneSubtitle")}
+                </p>
+              )}
 
               {/* Phone input */}
               <div className="mb-4">
@@ -210,7 +310,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
                       setError("");
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") handleRequestOtp();
+                      if (e.key === "Enter") submitPhone();
                     }}
                     placeholder={t("phonePlaceholder")}
                     className="flex-1 text-sm text-dark dark:text-gray-200 bg-transparent outline-none"
@@ -221,68 +321,59 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
               </div>
 
               <button
-                onClick={handleRequestOtp}
+                onClick={submitPhone}
                 disabled={loading || !phoneNumber.trim()}
                 className="mb-3 w-full rounded-lg bg-dark py-3 text-sm font-semibold text-white transition-colors hover:bg-dark/90 disabled:opacity-50"
               >
                 {loading ? t("sending") : t("continue")}
               </button>
 
-              {/* Divider */}
-              <div className="mb-3 flex items-center gap-3">
-                <div className="h-px flex-1 bg-gray-border" />
-                <span className="text-xs text-gray-text">{t("or")}</span>
-                <div className="h-px flex-1 bg-gray-border" />
-              </div>
+              {/* Social sign-in and terms belong to login only - in the
+                  add-phone step the customer is already signed in. */}
+              {step === "phone" && (
+                <>
+                  {/* Divider */}
+                  <div className="mb-3 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-gray-border" />
+                    <span className="text-xs text-gray-text">{t("or")}</span>
+                    <div className="h-px flex-1 bg-gray-border" />
+                  </div>
 
-              {/* Social buttons */}
-              <button className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-border dark:border-gray-700 py-3 text-sm font-medium text-dark dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-dark/80">
-                <svg width="18" height="18" viewBox="0 0 18 18">
-                  <path
-                    d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
-                    fill="#EA4335"
-                  />
-                </svg>
-                {t("continueGoogle")}
-              </button>
+                  <div className="mb-3">
+                    <GoogleSignInButton
+                      onCredential={handleGoogleCredential}
+                      onError={() => setError(t("googleError"))}
+                      disabled={googleLoading || loading}
+                    />
+                  </div>
 
-              <button className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-border dark:border-gray-700 py-3 text-sm font-medium text-dark dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-dark/80">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                  className="shrink-0"
-                >
-                  <path d="M17.05 12.79c-.03-2.7 2.2-4 2.3-4.06-1.25-1.83-3.2-2.08-3.9-2.11-1.66-.17-3.24.98-4.08.98-.84 0-2.14-.96-3.52-.93-1.81.03-3.48 1.05-4.41 2.67-1.88 3.26-.48 8.08 1.35 10.72.9 1.29 1.96 2.74 3.35 2.69 1.35-.05 1.86-.87 3.49-.87 1.62 0 2.08.87 3.5.84 1.45-.02 2.36-1.31 3.24-2.61 1.02-1.5 1.44-2.95 1.47-3.02-.03-.02-2.82-1.08-2.85-4.3zM14.4 4.84c.74-.9 1.24-2.15 1.1-3.4-1.07.05-2.36.72-3.13 1.61-.69.79-1.29 2.06-1.13 3.28 1.19.09 2.41-.61 3.16-1.49z" />
-                </svg>
-                {t("continueApple")}
-              </button>
+                  <button className="mb-6 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-border dark:border-gray-700 py-3 text-sm font-medium text-dark dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-dark/80">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                      className="shrink-0"
+                    >
+                      <path d="M17.05 12.79c-.03-2.7 2.2-4 2.3-4.06-1.25-1.83-3.2-2.08-3.9-2.11-1.66-.17-3.24.98-4.08.98-.84 0-2.14-.96-3.52-.93-1.81.03-3.48 1.05-4.41 2.67-1.88 3.26-.48 8.08 1.35 10.72.9 1.29 1.96 2.74 3.35 2.69 1.35-.05 1.86-.87 3.49-.87 1.62 0 2.08.87 3.5.84 1.45-.02 2.36-1.31 3.24-2.61 1.02-1.5 1.44-2.95 1.47-3.02-.03-.02-2.82-1.08-2.85-4.3zM14.4 4.84c.74-.9 1.24-2.15 1.1-3.4-1.07.05-2.36.72-3.13 1.61-.69.79-1.29 2.06-1.13 3.28 1.19.09 2.41-.61 3.16-1.49z" />
+                    </svg>
+                    {t("continueApple")}
+                  </button>
 
-              {/* Terms */}
-              <p className="text-center text-[11px] leading-relaxed text-gray-text">
-                {t("termsText")}
-              </p>
+                  {/* Terms */}
+                  <p className="text-center text-[11px] leading-relaxed text-gray-text">
+                    {t("termsText")}
+                  </p>
+                </>
+              )}
             </>
           ) : (
             <>
               {/* OTP Step */}
               <button
                 onClick={() => {
-                  setStep("phone");
+                  setStep(step === "addPhoneOtp" ? "addPhone" : "phone");
                   setOtp(["", "", "", "", "", ""]);
                   setError("");
                 }}
@@ -329,7 +420,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
               )}
 
               <button
-                onClick={() => handleVerifyOtp()}
+                onClick={() => submitOtp()}
                 disabled={loading || otp.join("").length !== 6}
                 className="mb-4 w-full rounded-lg bg-dark py-3 text-sm font-semibold text-white transition-colors hover:bg-dark/90 disabled:opacity-50"
               >
