@@ -47,15 +47,25 @@ declare module "react" {
 }
 
 /**
- * The widget paints inside a shadow root, so page CSS cannot reach it. Its text
- * inherits our colour and is already right in both themes; its own outline is a
- * fixed light grey that glares on a dark page. Tamara's `css` config is the
- * supported way in.
+ * Keep the widget on the light surface it is drawn for, even on a dark page.
+ *
+ * Its shadow root inherits our text colour, but its own graphics do not follow:
+ * the riyal glyph is `<path fill="black">` and the "More options" popup paints
+ * itself white. Inheriting a light colour therefore gave us their light-mode
+ * artwork under our dark-mode text - a black currency symbol, and a popup whose
+ * text vanished on hover. Setting the colour back and giving the card a light
+ * background restores the one theme they actually ship.
+ *
+ * `!important` because their card rule chains two classes and outranks ours.
+ * Injected through Tamara's supported `css` config; page CSS cannot reach a
+ * shadow root.
  */
-const borderCss = (dark: boolean) =>
-  `.tamara-summary-widget__container { border-color: ${
-    dark ? "#374151" : "#e5e5e5"
-  }; }`;
+const LIGHT_SURFACE_CSS = `
+:host { color: #1a1a1a; }
+.tamara-summary-widget__container {
+  background-color: #ffffff !important;
+  border-color: #e5e5e5 !important;
+}`;
 
 interface TamaraWidgetProps {
   /** SAR, gross. The number the customer would actually pay. */
@@ -103,7 +113,8 @@ export default function TamaraWidget({
       lang: locale === "ar" ? "ar" : "en",
       country: "SA",
       publicKey,
-      css: borderCss(theme === "dark"),
+      // Light pages already give it the surface it wants.
+      css: theme === "dark" ? LIGHT_SURFACE_CSS : "",
     };
     window.TamaraWidgetV2?.refresh();
   }, [publicKey, locale, amount, theme]);
