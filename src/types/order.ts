@@ -96,6 +96,9 @@ export interface VendorOrderResponse {
   /** Per shipment: a caravan travels as several parcels, often several couriers. */
   trackingNumber?: string;
   carrier?: string;
+  /** SPL for an API-booked shipment, OTHER for a hand-typed one. */
+  carrierCode?: "SPL" | "OTHER";
+  waybillNumber?: string;
   shippedAt?: string;
   deliveredAt?: string;
   cancellationReason?: string;

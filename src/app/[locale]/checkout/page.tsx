@@ -20,6 +20,7 @@ import SarIcon from "@/components/shared/SarIcon";
 
 export default function CheckoutPage() {
   const t = useTranslations();
+  const ta = useTranslations("addresses");
   const locale = useLocale();
   const router = useRouter();
   const { items, summary } = useCart();
@@ -27,6 +28,7 @@ export default function CheckoutPage() {
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [addressNoticeDismissed, setAddressNoticeDismissed] = useState(false);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [addressLoading, setAddressLoading] = useState(true);
@@ -126,6 +128,17 @@ export default function CheckoutPage() {
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
 
+  /**
+   * Nudge, never a block.
+   *
+   * A saved address from before National Address existed has no building number,
+   * which makes the courier's first delivery attempt a guess. Worth one prompt,
+   * not worth stopping the order: an unverified address still ships.
+   */
+  const needsAddressDetail = Boolean(
+    selectedAddress && !selectedAddress.buildingNumber,
+  );
+
   return (
     <div className="mx-auto max-w-360 px-4 py-8 sm:px-6">
       <h1 className="mb-6 text-2xl font-bold text-dark dark:text-gray-100">
@@ -143,6 +156,32 @@ export default function CheckoutPage() {
                 {t("checkout.shippingAddress")}
               </h2>
             </div>
+
+            {needsAddressDetail && !addressNoticeDismissed && (
+              <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-700/50 dark:bg-amber-900/20">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                  {ta("confirmAddressTitle")}
+                </p>
+                <p className="mt-1 text-xs text-amber-800 dark:text-amber-300">
+                  {ta("confirmAddressBody")}
+                </p>
+                <div className="mt-2 flex gap-3">
+                  <Link
+                    href="/profile/addresses"
+                    className="text-xs font-semibold text-amber-900 underline dark:text-amber-200"
+                  >
+                    {ta("confirmAddressCta")}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setAddressNoticeDismissed(true)}
+                    className="text-xs text-amber-800 dark:text-amber-300"
+                  >
+                    {ta("dismiss")}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {addressLoading ? (
               <div className="flex h-20 items-center justify-center">

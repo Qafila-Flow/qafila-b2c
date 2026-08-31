@@ -114,9 +114,21 @@ export default function ShipmentCard({ shipment, index, total }: Props) {
             {shipment.carrier ? `${shipment.carrier} · ` : ""}
             {t("trackingNumber")}
           </span>
-          <span className="ms-auto font-mono text-xs font-semibold text-dark dark:text-gray-200" dir="ltr">
-            {shipment.trackingNumber}
-          </span>
+          {shipment.carrierCode === "SPL" ? (
+            <a
+              href={`https://splonline.com.sa/en/tracking/?id=${encodeURIComponent(shipment.trackingNumber)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ms-auto font-mono text-xs font-semibold text-dark underline underline-offset-2 dark:text-gray-200"
+              dir="ltr"
+            >
+              {shipment.trackingNumber}
+            </a>
+          ) : (
+            <span className="ms-auto font-mono text-xs font-semibold text-dark dark:text-gray-200" dir="ltr">
+              {shipment.trackingNumber}
+            </span>
+          )}
         </div>
       )}
 

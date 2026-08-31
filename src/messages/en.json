@@ -406,7 +406,20 @@
     "cityRequired": "Please select your city",
     "loading": "Loading...",
     "cityListUnavailable": "City list could not be loaded. Please refresh and try again.",
-    "legacyCityHint": "Currently saved as \"{city}\" — please reselect your city."
+    "legacyCityHint": "Currently saved as \"{city}\" — please reselect your city.",
+    "findAddress": "Find my address",
+    "findAddressHint": "Building number and postal code, e.g. 8228 12643",
+    "lookupUnavailable": "Address lookup is unavailable right now. You can enter your address below.",
+    "noAddressFound": "No matching address found. Check the numbers or enter your address below.",
+    "addressVerified": "Address verified",
+    "buildingNumber": "Building no.",
+    "additionalNumber": "Additional no.",
+    "postalCode": "Postal code",
+    "confirmAddressTitle": "Confirm your delivery address",
+    "confirmAddressBody": "Add your building number and postal code so the courier can find you.",
+    "confirmAddressCta": "Update address",
+    "dismiss": "Not now",
+    "shortAddress": "Short address (e.g. RRRD2929)"
   },
   "categoryPage": {
     "home": "Home",

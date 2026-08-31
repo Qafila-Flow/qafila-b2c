@@ -24,6 +24,16 @@ export interface Address {
   directions?: string;
   latitude?: number;
   longitude?: number;
+  // ── Saudi National Address ────────────────────────────────────────────────
+  // Carriers route on these rather than the free-text street. Null on anything
+  // saved before they existed; such an address still ships, flagged for ops.
+  buildingNumber?: string | null;
+  additionalNumber?: string | null;
+  postalCode?: string | null;
+  shortAddress?: string | null;
+  districtName?: string | null;
+  /** Null means never confirmed against the National Address API. */
+  addressVerifiedAt?: string | null;
   isDefault: boolean;
   isActive: boolean;
   createdAt: string;
@@ -57,6 +67,13 @@ export interface CreateAddressPayload {
   directions?: string;
   latitude?: number;
   longitude?: number;
+  buildingNumber?: string;
+  additionalNumber?: string;
+  postalCode?: string;
+  shortAddress?: string;
+  districtName?: string;
+  /** Set only when the lookup returned this address. Hand-typed stays false. */
+  addressVerified?: boolean;
   isDefault?: boolean;
 }
 

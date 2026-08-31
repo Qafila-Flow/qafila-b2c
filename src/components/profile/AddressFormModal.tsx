@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import CityRegionSelect from "@/components/address/CityRegionSelect";
+import NationalAddressLookup from "@/components/address/NationalAddressLookup";
+import type { ResolvedAddress } from "@/lib/api/shipping";
 import type { City } from "@/lib/api/cities";
 import type {
   Address,
@@ -36,6 +38,14 @@ export default function AddressFormModal({
   const [area, setArea] = useState("");
   const [apartmentNo, setApartmentNo] = useState("");
   const [directions, setDirections] = useState("");
+  // Saudi National Address. The carrier routes on these, not on `street`.
+  const [buildingNumber, setBuildingNumber] = useState("");
+  const [additionalNumber, setAdditionalNumber] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [districtName, setDistrictName] = useState("");
+  const [shortAddress, setShortAddress] = useState("");
+  /** True only when these came back from the lookup, never when typed by hand. */
+  const [verified, setVerified] = useState(false);
   const [isDefault, setIsDefault] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -55,6 +65,12 @@ export default function AddressFormModal({
       setArea(address.area);
       setApartmentNo(address.apartmentNo || "");
       setDirections(address.directions || "");
+      setBuildingNumber(address.buildingNumber || "");
+      setAdditionalNumber(address.additionalNumber || "");
+      setPostalCode(address.postalCode || "");
+      setDistrictName(address.districtName || "");
+      setShortAddress(address.shortAddress || "");
+      setVerified(Boolean(address.addressVerifiedAt));
       setIsDefault(address.isDefault);
     } else {
       setType("HOME");
@@ -67,6 +83,12 @@ export default function AddressFormModal({
       setArea("");
       setApartmentNo("");
       setDirections("");
+      setBuildingNumber("");
+      setAdditionalNumber("");
+      setPostalCode("");
+      setDistrictName("");
+      setShortAddress("");
+      setVerified(false);
       setIsDefault(false);
     }
     setError("");
@@ -99,6 +121,12 @@ export default function AddressFormModal({
         area: area.trim(),
         apartmentNo: apartmentNo.trim() || undefined,
         directions: directions.trim() || undefined,
+        buildingNumber: buildingNumber.trim() || undefined,
+        additionalNumber: additionalNumber.trim() || undefined,
+        postalCode: postalCode.trim() || undefined,
+        districtName: districtName.trim() || undefined,
+        shortAddress: shortAddress.trim().toUpperCase() || undefined,
+        addressVerified: verified,
         isDefault,
       });
       onClose();
@@ -202,6 +230,21 @@ export default function AddressFormModal({
             className="w-full rounded-lg border border-gray-border px-4 py-3 text-sm outline-none transition-colors placeholder:text-gray-text focus:border-dark"
           />
 
+          {/* National Address lookup. Fills the carrier-routable fields below;
+              everything stays editable, and skipping it is allowed. */}
+          <NationalAddressLookup
+            verified={verified}
+            onSelect={(a: ResolvedAddress) => {
+              if (a.buildingNumber) setBuildingNumber(a.buildingNumber);
+              if (a.additionalNumber) setAdditionalNumber(a.additionalNumber);
+              if (a.postalCode) setPostalCode(a.postalCode);
+              if (a.district) setDistrictName(a.district);
+              if (a.street && !street) setStreet(a.street);
+              if (a.district && !area) setArea(a.district);
+              setVerified(true);
+            }}
+          />
+
           {/* Region & City */}
           <CityRegionSelect
             value={cityId}
@@ -224,6 +267,47 @@ export default function AddressFormModal({
             required
             className="w-full rounded-lg border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm text-dark dark:text-gray-200 outline-none transition-colors placeholder:text-gray-text dark:placeholder:text-gray-500 focus:border-dark"
           />
+
+          {/* Short address: the 8-character national code, e.g. RRRD2929. Asked
+              for first because it is the identifier people actually memorise,
+              and the carrier may accept it in place of a postal code. */}
+          <input
+            type="text"
+            value={shortAddress}
+            onChange={(e) => {
+              setShortAddress(e.target.value.toUpperCase());
+              setVerified(false);
+            }}
+            maxLength={8}
+            placeholder={t("shortAddress")}
+            dir="ltr"
+            className="w-full rounded-lg border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm text-dark dark:text-gray-200 outline-none transition-colors placeholder:text-gray-text dark:placeholder:text-gray-500 focus:border-dark"
+          />
+
+          {/* National Address. Editing any of these by hand clears the verified
+              flag: a hand-typed value has not been confirmed by anyone. */}
+          <div className="grid grid-cols-3 gap-3">
+            {(
+              [
+                [buildingNumber, setBuildingNumber, "buildingNumber"],
+                [additionalNumber, setAdditionalNumber, "additionalNumber"],
+                [postalCode, setPostalCode, "postalCode"],
+              ] as const
+            ).map(([val, setter, key]) => (
+              <input
+                key={key}
+                type="text"
+                inputMode="numeric"
+                value={val}
+                onChange={(e) => {
+                  setter(e.target.value);
+                  setVerified(false);
+                }}
+                placeholder={t(key)}
+                className="w-full rounded-lg border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm text-dark dark:text-gray-200 outline-none transition-colors placeholder:text-gray-text dark:placeholder:text-gray-500 focus:border-dark"
+              />
+            ))}
+          </div>
 
           {/* Apartment No */}
           <input
