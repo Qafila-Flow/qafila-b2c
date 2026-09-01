@@ -1,43 +1,19 @@
 "use client";
 
-import { useState, useCallback, useReducer, useEffect } from "react";
+import { useState, useCallback, useReducer, useEffect, useRef } from "react";
 import { RotateCcw, Loader2 } from "lucide-react";
 import ResearchHero from "./ResearchHero";
 import ChatArea from "./ChatArea";
 import ChatInput from "./ChatInput";
 import { Message } from "./ChatMessage";
-import { streamChat, getHistory, resetHistory, Source } from "@/lib/api/ai-research";
-
-/**
- * The AI model occasionally echoes tool-call JSON as plain text.
- * Strip standalone JSON lines AND trailing JSON fragments appended to text.
- */
-function stripJsonLeakage(text: string): string {
-  // Normalise literal \n sequences before checking
-  const normalised = text.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
-
-  const lines = normalised.split("\n");
-  const cleaned = lines.filter((line) => {
-    const t = line.trim();
-    if (!t) return true;
-    // Drop lines that are entirely a JSON object/array
-    if (
-      (t.startsWith("{") && t.endsWith("}")) ||
-      (t.startsWith("[") && t.endsWith("]"))
-    ) {
-      try { JSON.parse(t); return false; } catch { return true; }
-    }
-    return true;
-  });
-
-  let result = cleaned.join("\n").replace(/\n{3,}/g, "\n\n").trim();
-
-  // Also strip trailing JSON fragment at end of message
-  // e.g. "Some text {"locale":"ar"}" or "Some text\n{"key":"val"}"
-  result = result.replace(/[,\s]*\{[^{}]{0,200}\}$/, "").trim();
-
-  return result;
-}
+import {
+  streamChat,
+  getHistory,
+  resetHistory,
+  Source,
+  MAX_MESSAGES_PER_USER,
+} from "@/lib/api/ai-research";
+import { stripJsonLeakage } from "./sanitize";
 
 interface ResearchState {
   messages: Message[];
@@ -57,6 +33,7 @@ type ResearchAction =
   | { type: "SET_PDF"; payload: { id: string; pdfId: string; downloadUrl: string } }
   | { type: "FINISH_STREAM"; payload: { id: string } }
   | { type: "SET_ERROR"; payload: { id: string; error: string } }
+  | { type: "RETRY"; payload: { id: string } }
   | { type: "RESET" };
 
 function reducer(state: ResearchState, action: ResearchAction): ResearchState {
@@ -163,14 +140,22 @@ function reducer(state: ResearchState, action: ResearchAction): ResearchState {
       };
 
     case "SET_ERROR":
+      // Keep whatever streamed successfully - a failure in the last round
+      // used to discard a report that was already most of the way there.
       return {
         ...state,
         isStreaming: false,
         messages: state.messages.map((m) =>
           m.id === action.payload.id
-            ? { ...m, isStreaming: false, content: `Error: ${action.payload.error}` }
+            ? { ...m, isStreaming: false, error: action.payload.error }
             : m
         ),
+      };
+
+    case "RETRY":
+      return {
+        ...state,
+        messages: state.messages.filter((m) => m.id !== action.payload.id),
       };
 
     case "RESET":
@@ -227,17 +212,21 @@ export default function ResearchClient() {
     }
   }, [isResetting, state.isStreaming]);
 
-  const handleSend = useCallback(
-    async (message: string) => {
-      if (state.isStreaming) return;
+  // Kept so a failed answer can be retried without retyping the question.
+  const lastPromptRef = useRef<string>("");
 
+  const runStream = useCallback(
+    async (message: string, replayUserBubble: boolean) => {
       const userMsgId = `user-${Date.now()}`;
       const aiMsgId = `ai-${Date.now()}`;
+      lastPromptRef.current = message;
 
-      dispatch({
-        type: "SEND_MESSAGE",
-        payload: { id: userMsgId, role: "user", content: message },
-      });
+      if (replayUserBubble) {
+        dispatch({
+          type: "SEND_MESSAGE",
+          payload: { id: userMsgId, role: "user", content: message },
+        });
+      }
       dispatch({ type: "START_STREAM", payload: { id: aiMsgId } });
 
       // Backend now manages history — no need to pass it
@@ -265,7 +254,24 @@ export default function ResearchClient() {
         });
       }
     },
-    [state.isStreaming]
+    []
+  );
+
+  const handleSend = useCallback(
+    (message: string) => {
+      if (state.isStreaming) return;
+      void runStream(message, true);
+    },
+    [state.isStreaming, runStream]
+  );
+
+  const handleRetry = useCallback(
+    (failedId: string) => {
+      if (state.isStreaming || !lastPromptRef.current) return;
+      dispatch({ type: "RETRY", payload: { id: failedId } });
+      void runStream(lastPromptRef.current, false);
+    },
+    [state.isStreaming, runStream]
   );
 
   // Loading skeleton
@@ -287,8 +293,11 @@ export default function ResearchClient() {
           <div className="flex items-center justify-between border-b border-gray-700 bg-dark px-4 py-2">
             <span className="text-sm font-medium text-gray-300">
               Research AI
+              {/* The backend keeps a rolling window of this many messages,
+                  both roles counted. */}
               <span className="ms-2 text-xs text-gray-500">
-                ({state.messages.filter((m) => !m.isStreaming).length}/20 messages)
+                {state.messages.filter((m) => !m.isStreaming).length}/
+                {MAX_MESSAGES_PER_USER}
               </span>
             </span>
             <button
@@ -306,7 +315,7 @@ export default function ResearchClient() {
             </button>
           </div>
 
-          <ChatArea messages={state.messages} />
+          <ChatArea messages={state.messages} onRetry={handleRetry} />
           <ChatInput onSend={handleSend} isStreaming={state.isStreaming} />
         </>
       )}

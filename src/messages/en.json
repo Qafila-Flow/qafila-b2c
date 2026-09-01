@@ -30,7 +30,25 @@
     "generating": "Generating...",
     "sources": "Sources",
     "pdfOffer": "Would you like to export this as PDF?",
-    "exportPdf": "Export as PDF"
+    "exportPdf": "Export as PDF",
+    "jumpToLatest": "Jump to latest",
+    "copy": "Copy",
+    "copied": "Copied",
+    "retry": "Try again",
+    "tool": {
+      "searching": "Searching the web",
+      "readingStats": "Reading platform statistics",
+      "readingCatalog": "Querying the catalog",
+      "readingVendors": "Looking up vendors",
+      "readingCategories": "Reading categories",
+      "buildingReport": "Building the PDF report"
+    },
+    "suggestions": {
+      "ksaMarket": "Saudi e-commerce market size",
+      "platformStats": "Qafila platform overview",
+      "competitors": "Compare our prices to the market",
+      "trends": "Retail trends in the GCC"
+    }
   },
   "search": {
     "placeholder": "Search for \"Watches\"",

@@ -1,14 +1,19 @@
 "use client";
 
+import { normaliseModelText } from "./sanitize";
+
 interface MarkdownRendererProps {
   content: string;
+  /** While true the trailing line may be half-arrived. */
+  isStreaming?: boolean;
 }
 
-export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
-  // Normalise literal \n sequences the model sometimes emits
-  const normalised = content
-    .replace(/\\n/g, "\n")
-    .replace(/\\t/g, "\t");
+export default function MarkdownRenderer({
+  content,
+  isStreaming,
+}: MarkdownRendererProps) {
+  // Escaped whitespace, plus the PDF-only [[chart:N]] markers.
+  const normalised = normaliseModelText(content);
 
   const lines = normalised.split("\n");
   const elements: React.ReactNode[] = [];
@@ -106,7 +111,14 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     i++;
   }
 
-  return <div className="prose-sm max-w-none">{elements}</div>;
+  return (
+    <div className="prose-sm max-w-none">
+      {elements}
+      {isStreaming && (
+        <span className="ms-0.5 inline-block h-4 w-0.5 animate-pulse bg-primary align-middle" />
+      )}
+    </div>
+  );
 }
 
 // ─── Inline parser ──────────────────────────────────────────────────────────

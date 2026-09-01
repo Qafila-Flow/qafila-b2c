@@ -1,5 +1,12 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
+/**
+ * Mirrors MAX_MESSAGES_PER_USER in the backend's ai-research.service.ts. Both
+ * roles count towards it: the server trims the conversation to this many rows.
+ * Separate repos, so it cannot be imported - keep the two in step.
+ */
+export const MAX_MESSAGES_PER_USER = 20;
+
 function authHeaders(): Record<string, string> {
   const token =
     typeof window !== 'undefined' ? localStorage.getItem('qafila_token') : null;

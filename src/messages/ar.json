@@ -30,7 +30,25 @@
     "generating": "جارٍ الإنشاء...",
     "sources": "المصادر",
     "pdfOffer": "هل تريد تصدير هذا كـ PDF؟",
-    "exportPdf": "تصدير كـ PDF"
+    "exportPdf": "تصدير كـ PDF",
+    "jumpToLatest": "الانتقال إلى الأحدث",
+    "copy": "نسخ",
+    "copied": "تم النسخ",
+    "retry": "إعادة المحاولة",
+    "tool": {
+      "searching": "البحث في الإنترنت",
+      "readingStats": "قراءة إحصائيات المنصة",
+      "readingCatalog": "الاستعلام عن الكتالوج",
+      "readingVendors": "البحث عن البائعين",
+      "readingCategories": "قراءة التصنيفات",
+      "buildingReport": "إنشاء تقرير PDF"
+    },
+    "suggestions": {
+      "ksaMarket": "حجم سوق التجارة الإلكترونية السعودي",
+      "platformStats": "نظرة عامة على منصة قافلة",
+      "competitors": "قارن أسعارنا بالسوق",
+      "trends": "اتجاهات التجزئة في الخليج"
+    }
   },
   "search": {
     "placeholder": "ابحث عن \"ساعات\"",

@@ -5,12 +5,8 @@ import { SendHorizonal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import TopicPill from "./TopicPill";
 
-const SUGGESTION_CHIPS = [
-  "Summary global trade",
-  "Deep dive population growth",
-  "List generative AI trends",
-  "Saudi fashion market size 2026",
-];
+/** Translation keys under research.suggestions - kept short enough to fit a chip. */
+const SUGGESTION_KEYS = ["ksaMarket", "platformStats", "competitors", "trends"];
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -74,10 +70,10 @@ export default function ChatInput({ onSend, isStreaming }: ChatInputProps) {
 
         {/* Suggestion chips */}
         <div className="mt-2.5 flex flex-wrap gap-2">
-          {SUGGESTION_CHIPS.map((chip) => (
+          {SUGGESTION_KEYS.map((key) => (
             <TopicPill
-              key={chip}
-              label={chip}
+              key={key}
+              label={t(`suggestions.${key}`)}
               onClick={(label) => {
                 setValue(label);
                 textareaRef.current?.focus();
