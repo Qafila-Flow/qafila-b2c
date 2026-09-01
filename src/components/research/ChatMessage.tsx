@@ -25,6 +25,18 @@ interface ChatMessageProps {
   onRetry?: () => void;
 }
 
+const TOOL_LABEL_MAX = 120;
+
+/** Never let a progress line grow past one clause, whatever the server sent. */
+function clipLabel(text: string): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  // A payload that is really serialised JSON is not worth showing at all.
+  if (/^[[{]/.test(flat)) return "";
+  return flat.length > TOOL_LABEL_MAX
+    ? `${flat.slice(0, TOOL_LABEL_MAX - 1)}…`
+    : flat;
+}
+
 /** Tool names are internal; the reader gets the activity they describe. */
 const TOOL_LABELS: Record<string, string> = {
   web_search: "searching",
@@ -90,10 +102,12 @@ export default function ChatMessage({ message, onRetry }: ChatMessageProps) {
                   ) : (
                     <Check size={11} className="shrink-0 text-primary/70" />
                   )}
-                  <span className="truncate">
+                  <span className="min-w-0 truncate">
                     {key ? t(`tool.${key}`) : a.tool}
+                    {/* Clipped as well as truncated: a regressed payload once
+                        put an entire serialised report on this line. */}
                     {a.query ? (
-                      <span className="text-gray-500"> - {a.query}</span>
+                      <span className="text-gray-500"> - {clipLabel(a.query)}</span>
                     ) : null}
                   </span>
                 </div>
