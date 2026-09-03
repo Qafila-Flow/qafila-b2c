@@ -268,9 +268,10 @@ export default function AddressFormModal({
             className="w-full rounded-lg border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm text-dark dark:text-gray-200 outline-none transition-colors placeholder:text-gray-text dark:placeholder:text-gray-500 focus:border-dark"
           />
 
-          {/* Short address: the 8-character national code, e.g. RRRD2929. Asked
-              for first because it is the identifier people actually memorise,
-              and the carrier may accept it in place of a postal code. */}
+          {/* Short address: the 8-character national code, e.g. RRRD2929.
+              Required, and the only national identifier we ask for. Carriers
+              have been barred since 2026-01-01 from moving a parcel without a
+              National Address, and this is the form of it people memorise. */}
           <input
             type="text"
             value={shortAddress}
@@ -279,19 +280,24 @@ export default function AddressFormModal({
               setVerified(false);
             }}
             maxLength={8}
-            placeholder={t("shortAddress")}
+            placeholder={`${t("shortAddress")}*`}
+            required
             dir="ltr"
             className="w-full rounded-lg border border-gray-border dark:border-gray-700 bg-white dark:bg-dark px-4 py-3 text-sm text-dark dark:text-gray-200 outline-none transition-colors placeholder:text-gray-text dark:placeholder:text-gray-500 focus:border-dark"
           />
 
-          {/* National Address. Editing any of these by hand clears the verified
-              flag: a hand-typed value has not been confirmed by anyone. */}
-          <div className="grid grid-cols-3 gap-3">
+          {/* Editing either by hand clears the verified flag: a hand-typed value
+              has not been confirmed by anyone.
+
+              The postal code is deliberately not shown. On its own it is not a
+              National Address - it covers many buildings - so asking for it
+              invites an address that cannot legally be shipped. It is still
+              stored and still sent to the carrier; the lookup fills it in. */}
+          <div className="grid grid-cols-2 gap-3">
             {(
               [
                 [buildingNumber, setBuildingNumber, "buildingNumber"],
                 [additionalNumber, setAdditionalNumber, "additionalNumber"],
-                [postalCode, setPostalCode, "postalCode"],
               ] as const
             ).map(([val, setter, key]) => (
               <input
